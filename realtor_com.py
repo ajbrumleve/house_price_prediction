@@ -353,10 +353,9 @@ def clean_data(df):
     df_new['foreclosure'] = df_new['foreclosure'].fillna(False)
     df_new['new_construction'] = df_new['new_construction'].fillna(False)
     df_new['price_reduced'] = df_new['price_reduced'].fillna(False)
-    df_new.drop(['id', 'house_type', 'subdivision', 'state', 'lat', 'lon', 'address', "city", "county"], axis=1,
-                inplace=True)
+    df_new.drop(['id','house_type','subdivision','state','lat','lon','address', "city", "county"],axis = 1,inplace = True)
     df_new = df_new.dropna()
-    categorical_cols = ["postal_code"]
+    categorical_cols = [ "postal_code"]
     df_new[categorical_cols] = df_new[categorical_cols].astype('category')
     from sklearn.preprocessing import OneHotEncoder
 
@@ -390,21 +389,21 @@ def model(df):
 
     # Split the training set into
     # training and validation set
-    X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, train_size=0.8, test_size=0.2)
+    X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, train_size = 0.8, test_size = 0.2)
 
     from sklearn.linear_model import LinearRegression
 
     model_SVR = svm.SVR()
     model_SVR.fit(X_train, Y_train)
     Y_pred = model_SVR.predict(X_valid)
-    print("SVR - ", mean_absolute_percentage_error(Y_valid, Y_pred))
+    print("SVR - ",mean_absolute_percentage_error(Y_valid, Y_pred))
 
     model_RFR = RandomForestRegressor(n_estimators=10)
     model_RFR.fit(X_train, Y_train)
     Y_pred = model_RFR.predict(X_valid)
-    print("RF - ", mean_absolute_percentage_error(Y_valid, Y_pred))
+    print("RF - ",mean_absolute_percentage_error(Y_valid, Y_pred))
 
     model_LR = LinearRegression()
     model_LR.fit(X_train, Y_train)
     Y_pred = model_LR.predict(X_valid)
-    print("LR - ", mean_absolute_percentage_error(Y_valid, Y_pred))
+    print("LR - ",mean_absolute_percentage_error(Y_valid, Y_pred))
