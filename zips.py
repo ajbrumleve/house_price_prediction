@@ -11,7 +11,7 @@ class Zips:
 
     def get_zip_list(self):
         total_list = []
-        zips = pd.read_csv('zip_codes.csv')
+        zips = pd.read_csv('files/zip_codes.csv')
         if len(self.list_county) == 0:
             zips_list = zips[(zips["state_abbr"] == self.state_abbr) & (
                     zips['zipcode'].str.contains("HH") == False)]["zipcode"]
