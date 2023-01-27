@@ -17,7 +17,7 @@ def log(func):
     return wrapper
 
 def logging_formatter(logger, name):
-    fh = logging.FileHandler('test-log.log')
+    fh = logging.FileHandler('logs/test-log.log')
     fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     formatter = logging.Formatter(fmt)
     fh.setFormatter(formatter)

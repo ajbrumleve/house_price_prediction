@@ -228,7 +228,7 @@ def find_deals(realtor_obj,model,min_beds,min_sqrt,max_price,counties,state_abbr
 def run():
     logger = logging.getLogger("test")
     logging.basicConfig(level=logging.INFO)
-    log_info = logging.FileHandler('test-log.log')
+    log_info = logging.FileHandler('logs/test-log.log')
     log_info.setLevel(logging.INFO)
     logging.getLogger('').addHandler(log_info)
     t_file = timeit.default_timer()
@@ -331,7 +331,7 @@ def run():
 if __name__ == "__main__":
     logger = logging.getLogger("test")
     logging.basicConfig(level=logging.INFO)
-    log_info = logging.FileHandler('test-log.log')
+    log_info = logging.FileHandler('logs/test-log.log')
     log_info.setLevel(logging.INFO)
     logging.getLogger("wxApp")
     t_file = timeit.default_timer()
