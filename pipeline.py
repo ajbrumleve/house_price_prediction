@@ -37,7 +37,7 @@ def get_realtor_object(state_abbr):
     return r
 
 @log
-def get_model(realtor_object):
+def get_model(realtor_object,state_abbr,file_out=None):
     regr_model = Regression()
     regr_model.model = RandomForestRegressor()
     regr_model.train, regr_model.test = Regression.train_test_split(Regression, realtor_object.df)
@@ -54,9 +54,12 @@ def get_model(realtor_object):
     regr_model.X_train, regr_model.y_train = regr_model.x_and_y(regr_model.train)
     regr_model.X_test, regr_model.y_test = regr_model.x_and_y(regr_model.test)
     regr_model.model.fit(regr_model.X_train,regr_model.y_train)
-    r.model = regr_model
-    filename = f'{state_abbr}_realtor_model.sav'
-    pickle.dump(r, open(filename, 'wb'))
+    realtor_object.model = regr_model
+    if file_out is None:
+        filename = f'{state_abbr}_realtor_model.sav'
+    else:
+        filename = file_out
+    pickle.dump(realtor_object, open(filename, 'wb'))
     return regr_model
 
 @log
@@ -107,12 +110,12 @@ def predict_specific_address(realtor_object,model,zip,house_num):
                 zip_scraper.df[col] = slice[col].copy().iloc[:,0]
         else:
             zip_scraper.df[col] = 0
-    zip_scraper.df = zip_scraper.df[regr_model.train.columns]
+    zip_scraper.df = zip_scraper.df[model.train.columns]
     try:
         zip_scraper.real_price = zip_scraper.df['price'].values[0]
     except IndexError as e:
         print("The house number is not listed as for sale in the dataset")
-        return
+        return "The house number is not listed as for sale in the dataset"
     zip_scraper.df = zip_scraper.df.drop(['price'], axis=1)
     for col in zip_scraper.df.columns.copy():
         zip_scraper.df[col].copy().fillna(r.df[col].median(),inplace = True)
@@ -272,7 +275,7 @@ def run():
                 '%H:%M:%S.%f') + " - " + f"Dataset scraped in {timeit.default_timer() - t_section} seconds")
             t_section = timeit.default_timer()
             logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + f"Starting to build model")
-            regr_model = get_model(r)
+            regr_model = get_model(r,state_abbr)
             logging.info(datetime.now().strftime(
                 '%H:%M:%S.%f') + " - " + f"Model built in {timeit.default_timer() - t_section} seconds")
     elif prebuilt_model == False:
@@ -283,7 +286,7 @@ def run():
             '%H:%M:%S.%f') + " - " + f"Dataset scraped in {timeit.default_timer() - t_section} seconds")
         t_section = timeit.default_timer()
         logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + f"Starting to build model")
-        regr_model = get_model(r)
+        regr_model = get_model(r,state_abbr)
         logging.info(datetime.now().strftime(
             '%H:%M:%S.%f') + " - " + f"Model built in {timeit.default_timer() - t_section} seconds")
     else:
@@ -330,7 +333,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     log_info = logging.FileHandler('test-log.log')
     log_info.setLevel(logging.INFO)
-    logging.getLogger('').addHandler(log_info)
+    logging.getLogger("wxApp")
     t_file = timeit.default_timer()
     logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + "Starting program")
 
@@ -362,7 +365,7 @@ if __name__ == "__main__":
                         '%H:%M:%S.%f') + " - " + f"Dataset scraped in {timeit.default_timer() - t_section} seconds")
                     t_section = timeit.default_timer()
                     logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + f"Starting to build model")
-                    regr_model = get_model(r)
+                    regr_model = get_model(r,state_abbr)
                     evaluate_model(regr_model)
                     logging.info(datetime.now().strftime(
                         '%H:%M:%S.%f') + " - " + f"Model built in {timeit.default_timer() - t_section} seconds")
@@ -402,12 +405,12 @@ if __name__ == "__main__":
                     try:
                         if address_price[0] > address_price[1]:
                             print(
-                                f"The model predicts a price of {address_price[1]}. The actual price is {address_price[0]}. The house is {address_price[0] - address_price[1]} more expensive than the prediction.")
+                                f"The model predicts a price of ${address_price[1]}. The actual price is ${address_price[0]}. The house is {address_price[0] - address_price[1]} more expensive than the prediction.")
                         elif address_price[0] < address_price[1]:
                             print(
-                                f"The model predicts a price of {address_price[1]}. The actual price is {address_price[0]}. The house is {address_price[1] - address_price[0]} cheaper than the prediction.")
+                                f"The model predicts a price of ${address_price[1]}. The actual price is ${address_price[0]}. The house is {address_price[1] - address_price[0]} cheaper than the prediction.")
                         else:
-                            print(f"The model predicts the exact price of {address_price[0]}")
+                            print(f"The model predicts the exact price of ${address_price[0]}")
                     except TypeError as e:
                         logging.error(e)
                 elif repeat =="N":

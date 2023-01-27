@@ -6,7 +6,7 @@ def log(func):
     def wrapper(*args,**kwargs):
         t_section = timeit.default_timer()
         name = func.__name__
-        logger = logging.getLogger(name)
+        logger = logging.getLogger("wxApp")
         logger.setLevel(logging.INFO)
         logging_formatter(logger,name)
         logger.info(f"Running function: {name}")
