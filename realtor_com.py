@@ -14,7 +14,7 @@ class RealtorScraper:
         self.page_numbers = page_numbers
         self.cat_maps = {}
 
-    def send_request(self, page_number: int, offset_parameter: int) -> dict:
+    def send_request(self, page_number: int, offset_parameter: int, state_abbr: str) -> dict:
 
         url = "https://www.realtor.com/api/v1/hulk?client_id=rdc-x&schema=vesta"
         headers = {"content-type": "application/json"}
@@ -26,6 +26,7 @@ class RealtorScraper:
         json_body["variables"]["page_index"] = page_number
         json_body["seoPayload"] = page_number
         json_body["variables"]["offset"] = offset_parameter
+        json_body["variables"]["query"]['state_code'] = state_abbr
 
 
         r = requests.post(url=url, json=json_body, headers=headers)
@@ -66,13 +67,13 @@ class RealtorScraper:
         return feature_dict
 
     @log
-    def parse_json_data(self) -> list:
+    def parse_json_data(self, state_abbr: str = "MO") -> list:
         offset_parameter = 0
 
         feature_dict_list = []
 
         for i in range(1, self.page_numbers):
-            json_data = self.send_request(page_number=i, offset_parameter=offset_parameter)
+            json_data = self.send_request(page_number=i, offset_parameter=offset_parameter,state_abbr=state_abbr)
             offset_parameter += 42
 
             for entry in json_data["data"]["home_search"]["results"]:
@@ -82,8 +83,8 @@ class RealtorScraper:
         return feature_dict_list
 
     @log
-    def create_dataframe(self) -> pd.DataFrame:
-        feature_dict_list = self.parse_json_data()
+    def create_dataframe(self, state_abbr: str) -> pd.DataFrame:
+        feature_dict_list = self.parse_json_data(state_abbr)
         df = pd.DataFrame(feature_dict_list)
         # select house_type = single_family, price<1000000, beds<7, baths<10, garage < 5
         # drop state, lat, lon
@@ -106,11 +107,12 @@ class RealtorScraper:
         df_new['foreclosure'] = df_new['foreclosure'].fillna(False)
         df_new['new_construction'] = df_new['new_construction'].fillna(False)
         df_new['price_reduced'] = df_new['price_reduced'].fillna(False)
-        df_new.drop(['id', 'house_type', 'subdivision', 'state', 'lat', 'lon', "city", "county"], axis=1,
+        df_new.drop(['id', 'house_type', 'subdivision', 'state', 'lat', 'lon'], axis=1,
                     inplace=True)
         df_new = df_new.dropna()
-        address_df = df_new.copy()['address']
-        df_new.drop(['address'], axis=1, inplace=True)
+        address_df = df_new.copy()[['address',"city","county"]]
+        zip_df = df_new.copy()['postal_code']
+        df_new.drop(['address','city','county'], axis=1, inplace=True)
         categorical_cols = ["postal_code"]
         df_new[categorical_cols] = df_new[categorical_cols].astype('category')
         from sklearn.preprocessing import OneHotEncoder
@@ -129,7 +131,7 @@ class RealtorScraper:
         df_final = df_new.drop(object_cols, axis=1)
         df_final = df_final.drop('tags', axis=1)
         df_final = pd.concat([df_final, dummy_df], axis=1)
-        return df_final, address_df
+        return df_final, address_df, zip_df
 
 
 if __name__ == "__main__":
