@@ -8,6 +8,16 @@ from termcolor import colored as cl # text customization
 
 class RealtorZipScraper:
     def __init__(self, page_numbers: int, columns: list) -> None:
+        """
+        Initialize a RealtorZipScraper object.
+
+        Parameters:
+        - page_numbers (int): The number of pages to scrape.
+        - columns (list): The list of column names for the DataFrame.
+
+        Returns:
+        - None
+        """
         self.page_numbers = page_numbers
         self.df_columns = columns
 
@@ -31,6 +41,18 @@ class RealtorZipScraper:
     #     return json_data
 
     def search_addess(self, page_number: int, offset_parameter: int, zip) -> dict:
+        """
+            Sends a POST request to the Realtor.com API to search for addresses.
+            Retrieves JSON data for the specified page number, offset parameter, and zip code.
+
+            Parameters:
+                page_number (int): The page number for the search results.
+                offset_parameter (int): The offset value for the search results.
+                zip: The zip code to search for.
+
+            Returns:
+                dict: JSON response from the Realtor.com API.
+        """
         # page_number= 1
         # offset_parameter = 42
         url = "https://www.realtor.com/api/v1/hulk?client_id=rdc-x&schema=vesta"
@@ -50,6 +72,39 @@ class RealtorZipScraper:
 
 
     def extract_features(self, entry: dict) -> dict:
+        """
+        Extracts specific features from an entry dictionary representing a property.
+
+        Parameters:
+            entry (dict): The entry dictionary representing a property.
+
+        Returns:
+            dict: A dictionary containing the extracted features from the entry.
+                The dictionary includes the following keys:
+                - "id": The property ID.
+                - "price": The list price of the property.
+                - "beds": The number of bedrooms.
+                - "baths": The number of bathrooms.
+                - "garage": The number of garage spaces.
+                - "stories": The number of stories.
+                - "house_type": The type of the house.
+                - "lot_sqft": The size of the lot in square feet.
+                - "sqft": The size of the property in square feet.
+                - "price_reduced": A flag indicating if the price has been reduced.
+                - "foreclosure": A flag indicating if the property is a foreclosure.
+                - "new_construction": A flag indicating if the property is new construction.
+                - "new_listing": A flag indicating if the property is a new listing.
+                - "subdivision": A flag indicating if the property is part of a subdivision.
+                - "year_built": The year the property was built.
+                - "address": The street address of the property.
+                - "postal_code": The postal code of the property.
+                - "state": The state code of the property.
+                - "city": The city of the property.
+                - "tags": Any tags associated with the property.
+                - "lat": The latitude coordinate of the property's address (if available).
+                - "lon": The longitude coordinate of the property's address (if available).
+                - "county": The county name of the property (if available).
+        """
         feature_dict = {
             "id": entry["property_id"],
             "price": entry["list_price"],
@@ -83,6 +138,39 @@ class RealtorZipScraper:
         return feature_dict
 
     def parse_json_data(self,zip) -> list:
+        """
+        Parses JSON data obtained from a search query for properties based on a zip code.
+
+        Parameters:
+            zip (str): The zip code used for the property search.
+
+        Returns:
+            list: A list of dictionaries containing the extracted features for each property found in the search.
+                Each dictionary represents a property and includes the following keys:
+                - "id": The property ID.
+                - "price": The list price of the property.
+                - "beds": The number of bedrooms.
+                - "baths": The number of bathrooms.
+                - "garage": The number of garage spaces.
+                - "stories": The number of stories.
+                - "house_type": The type of the house.
+                - "lot_sqft": The size of the lot in square feet.
+                - "sqft": The size of the property in square feet.
+                - "price_reduced": A flag indicating if the price has been reduced.
+                - "foreclosure": A flag indicating if the property is a foreclosure.
+                - "new_construction": A flag indicating if the property is new construction.
+                - "new_listing": A flag indicating if the property is a new listing.
+                - "subdivision": A flag indicating if the property is part of a subdivision.
+                - "year_built": The year the property was built.
+                - "address": The street address of the property.
+                - "postal_code": The postal code of the property.
+                - "state": The state code of the property.
+                - "city": The city of the property.
+                - "tags": Any tags associated with the property.
+                - "lat": The latitude coordinate of the property's address (if available).
+                - "lon": The longitude coordinate of the property's address (if available).
+                - "county": The county name of the property (if available).
+        """
         offset_parameter = 0
 
         feature_dict_list = []
@@ -101,6 +189,30 @@ class RealtorZipScraper:
         return feature_dict_list
 
     def create_dataframe(self,zip) -> pd.DataFrame:
+        """
+        Creates a pandas DataFrame from the extracted feature dictionary list based on the provided zip code.
+
+        Parameters:
+            zip (str): The zip code used for the property search.
+
+        Returns:
+            pd.DataFrame: The resulting DataFrame containing filtered and processed data for the selected properties.
+                The DataFrame includes the following columns:
+                - "price": The list price of the property.
+                - "beds": The number of bedrooms.
+                - "baths": The number of bathrooms.
+                - "garage": The number of garage spaces.
+                - "stories": The number of stories.
+                - "lot_sqft": The size of the lot in square feet.
+                - "sqft": The size of the property in square feet.
+                - "price_reduced": A flag indicating if the price has been reduced.
+                - "foreclosure": A flag indicating if the property is a foreclosure.
+                - "new_construction": A flag indicating if the property is new construction.
+                - Remaining columns represent categorical features and are generated based on the available values.
+                  Each unique value for the "postal_code" column is converted into separate one-hot encoded columns.
+                  The "tags" column is exploded into separate dummy variable columns, and the values are summed for each property.
+                  The resulting DataFrame has these categorical columns combined with the original numeric columns.
+        """
         feature_dict_list = self.parse_json_data(zip)
         df = pd.DataFrame(feature_dict_list)
         # select house_type = single_family, price<1000000, beds<7, baths<10, garage < 5

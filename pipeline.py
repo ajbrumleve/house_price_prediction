@@ -23,6 +23,21 @@ from sklearn.model_selection import train_test_split
 
 @log
 def get_realtor_object(state_abbr):
+    """Retrieve a RealtorScraper object for a specific state.
+
+        This function creates a RealtorScraper object and retrieves the necessary data
+        by calling the `create_dataframe` method. It saves the resulting object to a file
+        using pickle and returns the object.
+
+        Args:
+            state_abbr (str): The abbreviation of the state (e.g., 'CA', 'NY').
+
+        Returns:
+            RealtorScraper or None: The RealtorScraper object if successful, None otherwise.
+
+        Example:
+            r = get_realtor_object('CA')
+    """
     r = RealtorScraper(page_numbers=206)
     try:
         df_obj = r.create_dataframe(state_abbr)
@@ -38,6 +53,24 @@ def get_realtor_object(state_abbr):
 
 @log
 def get_model(realtor_object,state_abbr,file_out=None):
+    """Retrieve a regression model using a RealtorScraper object.
+
+        This function creates a regression model using the provided RealtorScraper object
+        and saves the resulting model to a file using pickle. The `@log` decorator logs
+        the function execution and timing.
+
+        Args:
+            realtor_object (RealtorScraper): The RealtorScraper object containing the data.
+            state_abbr (str): The abbreviation of the state (e.g., 'CA', 'NY').
+            file_out (str, optional): The output file name for the saved model. If not specified,
+                it uses the default file name '{state_abbr}_realtor_model.sav'.
+
+        Returns:
+            Regression: The trained regression model.
+
+        Example:
+            regr_model = get_model(realtor_object, 'CA')
+    """
     regr_model = Regression()
     regr_model.model = RandomForestRegressor()
     regr_model.train, regr_model.test = Regression.train_test_split(Regression, realtor_object.df)
@@ -64,6 +97,22 @@ def get_model(realtor_object,state_abbr,file_out=None):
 
 @log
 def evaluate_model(model):
+    """Evaluate the performance of a regression model.
+
+        This function evaluates the performance of the provided regression model
+        by calculating various metrics such as Mean Squared Error (MSE), Mean Absolute
+        Error (MAE), and R-squared (R2) scores. The `@log` decorator logs the function
+        execution and timing.
+
+        Args:
+            model (Regression): The trained regression model.
+
+        Returns:
+            None
+
+        Example:
+            evaluate_model(regr_model)
+    """
     print("The baseline is determined by using median values.")
     func_regr_model = model
     func_regr_model.predictions = func_regr_model.model.predict(func_regr_model.X_test)
@@ -92,6 +141,24 @@ def evaluate_model(model):
 
 @log
 def predict_specific_address(realtor_object,model,zip,house_num):
+    """Predict the price for a specific address.
+
+        This function predicts the price for a specific address based on the provided
+        realtor object and trained regression model. The `@log` decorator logs the
+        function execution and timing.
+
+        Args:
+            realtor_object (RealtorScraper): The realtor object containing the dataset.
+            model (Regression): The trained regression model.
+            zip (str): The ZIP code of the address.
+            house_num (str): The house number of the address.
+
+        Returns:
+            tuple: A tuple containing the real price from the dataset and the predicted price.
+
+        Example:
+            predict_specific_address(realtor_object, regr_model, '12345', '123')
+    """
     r = realtor_object
 
     zip_scraper = RealtorZipScraper(page_numbers=10, columns=r.df.columns.union(['address']))
@@ -180,6 +247,27 @@ def predict_specific_address(realtor_object,model,zip,house_num):
 
 
 def RFECVSelect(df,estimator=LinearRegression(), min_features_to_select=5, step=1, n_jobs=-1, scoring="neg_mean_absolute_error", cv=5):
+    """Perform Recursive Feature Elimination with Cross-Validation (RFECV) on the given dataset.
+
+        This function applies RFECV to select the optimal features for the given estimator.
+        RFECV recursively eliminates features and selects the best subset of features based on
+        the specified scoring metric and cross-validation.
+
+        Args:
+            df (DataFrame): The input dataset.
+            estimator (estimator object, default=LinearRegression()): The estimator used in RFECV.
+            min_features_to_select (int, default=5): The minimum number of features to select.
+            step (int, default=1): The number of features to remove at each iteration.
+            n_jobs (int, default=-1): The number of jobs to run in parallel (-1 uses all available processors).
+            scoring (str, default="neg_mean_absolute_error"): The scoring metric used for feature evaluation.
+            cv (int, default=5): The number of cross-validation folds.
+
+        Returns:
+            RFECV: The fitted RFECV object.
+
+        Example:
+            RFECVSelect(df, estimator=RandomForestRegressor(), min_features_to_select=10, step=2)
+    """
     rfe_selector = RFECV(estimator=estimator, min_features_to_select=min_features_to_select, step=step,
                          n_jobs=n_jobs, scoring=scoring, cv=cv,verbose=2)
     ts = time.time()
@@ -201,6 +289,28 @@ def RFECVSelect(df,estimator=LinearRegression(), min_features_to_select=5, step=
     print(rfe_selector.feature_names_in_[rfe_selector.support_ == False])
 
 def find_deals(realtor_obj,model,min_beds,min_sqrt,max_price,counties,state_abbr):
+    """Find real estate deals based on specified criteria.
+
+        This function takes a Realtor object, a predictive model, and various criteria such as minimum
+        number of bedrooms, minimum square footage, maximum price, counties, and state abbreviation.
+        It filters the real estate data based on the criteria and returns a DataFrame of the filtered
+        deals sorted by the price difference between the prediction and the actual price.
+
+        Args:
+            realtor_obj (RealtorScraper): The Realtor object containing real estate data.
+            model (Regression): The predictive model used to make price predictions.
+            min_beds (int): The minimum number of bedrooms required for a deal.
+            min_sqrt (int): The minimum square footage required for a deal.
+            max_price (int): The maximum price allowed for a deal.
+            counties (list): A list of counties to include in the search.
+            state_abbr (str): The abbreviation of the state to search in.
+
+        Returns:
+            DataFrame: A DataFrame of the filtered real estate deals sorted by price difference.
+
+        Example:
+            find_deals(realtor_obj, model, min_beds=2, min_sqrt=1000, max_price=200000, counties=['County1', 'County2'], state_abbr='CA')
+    """
     Zip_Obj = Zips(counties, state_abbr)
     Zip_Obj.get_zip_list()
     zip_codes = Zip_Obj.list_zips
@@ -226,6 +336,21 @@ def find_deals(realtor_obj,model,min_beds,min_sqrt,max_price,counties,state_abbr
 
     return df_filtered
 def run():
+    def run():
+        """Run the program to scrape, build, and evaluate the model.
+
+        This function executes the main workflow of the program. It checks if a prebuilt model is available,
+        and if not, it scrapes the dataset and builds a new model. Then, it evaluates the model's performance.
+        After that, it prompts the user to enter a zip code and house number to predict the price of a specific address.
+        Finally, it compares the predicted price with the actual price and prints the difference.
+
+        Returns:
+            None
+
+        Example:
+            run()
+    """
+
     logger = logging.getLogger("test")
     logging.basicConfig(level=logging.INFO)
     log_info = logging.FileHandler('logs/test-log.log')

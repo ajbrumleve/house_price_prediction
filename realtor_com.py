@@ -11,11 +11,36 @@ from logging_decorator import *
 
 class RealtorScraper:
     def __init__(self, page_numbers: int) -> None:
+        """
+       Initialize a RealtorScraper object.
+
+       Parameters:
+       - page_numbers (int): The number of pages to scrape.
+
+       Returns:
+       - None
+       """
         self.page_numbers = page_numbers
         self.cat_maps = {}
 
     def send_request(self, page_number: int, offset_parameter: int, state_abbr: str) -> dict:
+        """Send a request to the realtor.com API to retrieve property data.
 
+            This method sends a POST request to the realtor.com API with the specified page number, offset parameter,
+            and state abbreviation to retrieve property data. It constructs the request URL, headers, and body
+            with the necessary parameters. The response is then converted to JSON format and returned as a dictionary.
+
+            Args:
+                page_number (int): The page number of the search results.
+                offset_parameter (int): The offset parameter for pagination.
+                state_abbr (str): The state abbreviation of the desired location.
+
+            Returns:
+                dict: The property data in JSON format.
+
+            Example:
+                json_data = send_request(page_number=2, offset_parameter=42, state_abbr="MO")
+        """
         url = "https://www.realtor.com/api/v1/hulk?client_id=rdc-x&schema=vesta"
         headers = {"content-type": "application/json"}
 
@@ -34,6 +59,24 @@ class RealtorScraper:
         return json_data
 
     def extract_features(self, entry: dict) -> dict:
+        """Extract relevant features from a property entry.
+
+            This method takes a property entry in the form of a dictionary and extracts relevant features
+            from it. The extracted features include the property ID, price, number of beds, number of baths,
+            garage size, number of stories, house type, lot square footage, total square footage, price reduction status,
+            foreclosure status, new construction status, new listing status, subdivision status, year built,
+            address, postal code, state, city, tags, latitude, longitude, and county (if available).
+
+            Args:
+                entry (dict): The property entry as a dictionary.
+
+            Returns:
+                dict: A dictionary containing the extracted features.
+
+            Example:
+                entry = {...}  # Property entry as a dictionary
+                features = extract_features(entry)
+        """
         feature_dict = {
             "id": entry["property_id"],
             "price": entry["list_price"],
@@ -68,6 +111,22 @@ class RealtorScraper:
 
     @log
     def parse_json_data(self, state_abbr: str = "MO") -> list:
+        """Parse JSON data and extract features from property entries.
+
+            This method sends API requests to retrieve JSON data for property listings in a specific state
+            (default: "MO"). It iterates through the JSON data, extracts relevant features from each property
+            entry using the `extract_features` method, and stores the feature dictionaries in a list.
+
+            Args:
+                state_abbr (str): The state abbreviation to search for property listings. Default is "MO" (Missouri).
+
+            Returns:
+                list: A list of dictionaries, where each dictionary represents the extracted features of a property.
+
+            Example:
+                realtor_obj = RealtorAPI()
+                feature_dicts = realtor_obj.parse_json_data(state_abbr="MO")
+        """
         offset_parameter = 0
 
         feature_dict_list = []
@@ -84,6 +143,26 @@ class RealtorScraper:
 
     @log
     def create_dataframe(self, state_abbr: str) -> pd.DataFrame:
+        """Create a filtered and preprocessed DataFrame of property listings.
+
+            This method creates a DataFrame of property listings by first calling the `parse_json_data` method
+            to retrieve a list of dictionaries containing the extracted features. The feature_dict_list is then
+            converted into a pandas DataFrame. The DataFrame is filtered based on specific criteria such as
+            house_type, price, beds, baths, garage, and lot_sqft. Certain columns with missing values are
+            imputed with the median. Additional filtering and preprocessing steps are performed on the DataFrame.
+
+            Args:
+                state_abbr (str): The state abbreviation to search for property listings.
+
+            Returns:
+                Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]: A tuple containing the filtered and preprocessed DataFrame,
+                a DataFrame containing the address details (address, city, county), and a DataFrame containing the
+                postal codes.
+
+            Example:
+                realtor_obj = RealtorAPI()
+                df, address_df, zip_df = realtor_obj.create_dataframe(state_abbr="MO")
+        """
         feature_dict_list = self.parse_json_data(state_abbr)
         df = pd.DataFrame(feature_dict_list)
         # select house_type = single_family, price<1000000, beds<7, baths<10, garage < 5

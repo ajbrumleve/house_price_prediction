@@ -5,6 +5,11 @@ from logging_decorator import *
 
 class Regression:
     def __init__(self):
+        """
+        Initialize a Regression object.
+
+        This constructor initializes the model as LinearRegression and the DataFrame as an empty DataFrame.
+        """
         self.model = LinearRegression()
         self.df = pd.DataFrame()
 
@@ -12,6 +17,21 @@ class Regression:
 
     @log
     def train_test_split(self,df):
+        """
+        Splits the provided DataFrame into train and test sets.
+
+        Parameters:
+            df (pd.DataFrame): The DataFrame to be split into train and test sets.
+
+        Returns:
+            tuple: A tuple containing the train and test DataFrames.
+
+        Note:
+            This function assumes that the DataFrame has already been preprocessed and contains the necessary columns
+            for model training and testing.
+
+        The @log decorator is used to log information about the function call and its results.
+        """
         # X_var = df[
         #     ['LotArea', 'MasVnrArea', 'BsmtUnfSF', 'TotalBsmtSF', '1stFlrSF', '2ndFlrSF', 'GrLivArea', 'GarageArea',
         #      'WoodDeckSF', 'OpenPorchSF']].values
@@ -22,6 +42,21 @@ class Regression:
 
     @log
     def x_and_y(self,df):
+        """
+        Extracts the features (X) and target variable (y) from the provided DataFrame.
+
+        Parameters:
+            df (pd.DataFrame): The DataFrame from which to extract features and target variable.
+
+        Returns:
+            tuple: A tuple containing the features (X) and target variable (y).
+
+        Note:
+            This function assumes that the DataFrame has already been preprocessed and contains the necessary columns
+            for feature extraction and target variable.
+
+        The @log decorator is used to log information about the function call and its results.
+        """
         X_var = df.drop(["price"],axis=1)
 
         y_var = df['price'].values

@@ -8,6 +8,11 @@ from termcolor import colored as cl # text customization
 
 class Services:
     def __init__(self):
+        """
+                Initialize a Services object.
+
+                This constructor doesn't accept any arguments and doesn't perform any operations.
+        """
         return
 
     # can potentially delete
@@ -41,6 +46,21 @@ class Services:
 
     @log
     def analyze_df(self,df):
+        """
+        Analyzes the provided DataFrame and returns information about null values and descriptive statistics.
+
+        Parameters:
+            df (pd.DataFrame): The DataFrame to be analyzed.
+
+        Returns:
+            tuple: A tuple containing the null value counts and the descriptive statistics.
+
+        Note:
+            This function assumes that the DataFrame has already been preprocessed and contains the necessary columns
+            for analysis.
+
+        The @log decorator is used to log information about the function call and its results.
+        """
         nulls = cl(df.isnull().sum(), attrs=['bold'])
         description = df.describe()
         return nulls,description
