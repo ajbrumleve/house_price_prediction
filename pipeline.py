@@ -40,10 +40,8 @@ def get_realtor_object(state_abbr):
     """
     r = RealtorScraper(page_numbers=206)
     try:
-        df_obj = r.create_dataframe(state_abbr)
-        r.df = df_obj[0]
-        r.address_df = df_obj[1]
-        r.zips_df = df_obj[2]
+        r.df, r.address_df, r.zips_df = r.create_dataframe(state_abbr)
+
     except Exception as e:
         logging.error(e)
         return
@@ -78,12 +76,16 @@ def get_model(realtor_object,state_abbr,file_out=None):
     # train-test split though to avoid data_leakage.
     # regr_model.train = Services.clean(Services, regr_model.train)
     # regr_model.test = Services.clean(Services, regr_model.test)
+
+    # Check null values are handled
     train_nulls = Services.analyze_df(Services, regr_model.train)[0]
     train_description = Services.analyze_df(Services, regr_model.train)[1]
     test_nulls = Services.analyze_df(Services, regr_model.train)[0]
     test_description = Services.analyze_df(Services, regr_model.train)[1]
     logging.debug(f"training nulls - {train_nulls}\ntest nulls - {test_nulls}\ntrain description - "
                   f"{train_description}\ntest description - {test_description}")
+
+    # Create X and Y vectors
     regr_model.X_train, regr_model.y_train = regr_model.x_and_y(regr_model.train)
     regr_model.X_test, regr_model.y_test = regr_model.x_and_y(regr_model.test)
     regr_model.model.fit(regr_model.X_train,regr_model.y_train)
