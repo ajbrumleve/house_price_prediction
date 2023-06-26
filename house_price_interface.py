@@ -114,6 +114,7 @@ class LoadModelPanel(wx.Panel):
         self.file_name_input = wx.TextCtrl(self, style=wx.TE_PROCESS_ENTER)
         self.train_file_out_input = wx.TextCtrl(self, style=wx.TE_PROCESS_ENTER)
         self.load_button = wx.Button(self, label='Load')
+        self.grid_search_toggle = wx.CheckBox(self, label="Grid Search", style=wx.BU_AUTODRAW)
         self.train_button = wx.Button(self, label='Train')
         # self.result_txt = wx.TextCtrl(self, size=(500, 400))
 
@@ -124,6 +125,7 @@ class LoadModelPanel(wx.Panel):
         load_sizer_horizontal.Add(self.file_name_input, flag=wx.ALL | wx.LEFT, border=5)
         load_sizer_horizontal.Add(self.load_button, flag=wx.ALL | wx.LEFT, border=5)
         train_file_out_sizer_horizontal.Add(self.train_file_out_input, flag=wx.ALL | wx.LEFT, border=5)
+        train_file_out_sizer_horizontal.Add(self.grid_search_toggle, flag=wx.ALL | wx.LEFT, border=5)
         train_file_out_sizer_horizontal.Add(self.train_button, flag=wx.ALL | wx.LEFT, border=5)
         train_sizer.Add(train_label, flag=wx.ALL | wx.LEFT, border=5)
         train_sizer.Add(self.state_input, flag=wx.ALL | wx.LEFT, border=5)
@@ -397,7 +399,8 @@ class MyFrame(wx.Frame):
                 '%H:%M:%S.%f') + " - " + f"Dataset scraped in {timeit.default_timer() - t_section} seconds")
             t_section = timeit.default_timer()
             self.logger.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + f"Starting to build model")
-            self.regr_model = pipeline.get_model(self.r, state_abbr, file_out)
+            gs_toggle = self.load_panel.grid_search_toggle.GetValue()
+            self.regr_model = pipeline.get_model(self.r, state_abbr, file_out, gs_toggle)
             pipeline.evaluate_model(self.regr_model)
             self.logger.info(datetime.now().strftime(
                 '%H:%M:%S.%f') + " - " + f"Model built in {timeit.default_timer() - t_section} seconds")

@@ -5,7 +5,6 @@ from logging_decorator import *
 from sklearn import svm
 from sklearn.feature_selection import RFE
 from sklearn.feature_selection import RFECV
-import wx
 from realtor_com import RealtorScraper
 from realtor_zip_search import RealtorZipScraper
 from services import Services
@@ -50,7 +49,7 @@ def get_realtor_object(state_abbr):
     return r
 
 @log
-def get_model(realtor_object,state_abbr,file_out=None):
+def get_model(realtor_object,state_abbr,file_out=None, grid_search=False):
     """Retrieve a regression model using a RealtorScraper object.
 
         This function creates a regression model using the provided RealtorScraper object
@@ -70,7 +69,7 @@ def get_model(realtor_object,state_abbr,file_out=None):
             regr_model = get_model(realtor_object, 'CA')
     """
     regr_model = Regression()
-    regr_model.model = RandomForestRegressor()
+
     regr_model.train, regr_model.test = Regression.train_test_split(Regression, realtor_object.df)
     # Added code which cleaned the original data so this is redundant. It may be better to save cleaning until after
     # train-test split though to avoid data_leakage.
@@ -88,6 +87,10 @@ def get_model(realtor_object,state_abbr,file_out=None):
     # Create X and Y vectors
     regr_model.X_train, regr_model.y_train = regr_model.x_and_y(regr_model.train)
     regr_model.X_test, regr_model.y_test = regr_model.x_and_y(regr_model.test)
+    if grid_search:
+        regr_model.model = regr_model.grid_search()
+    else:
+        regr_model.model = RandomForestRegressor(n_estimators=300)
     regr_model.model.fit(regr_model.X_train,regr_model.y_train)
     realtor_object.model = regr_model
     if file_out is None:
@@ -120,8 +123,8 @@ def evaluate_model(model):
     func_regr_model.predictions = func_regr_model.model.predict(func_regr_model.X_test)
     medians = np.full((len(func_regr_model.y_test),), np.median(func_regr_model.y_train))
 
-    print("Baseline MSE - ",mean_squared_error(func_regr_model.y_test, np.log(medians), squared=False))
-    print("MSE - ",mean_squared_error(func_regr_model.y_test, func_regr_model.predictions, squared=False))
+    print("Baseline RMSE - ",mean_squared_error(func_regr_model.y_test, np.log(medians), squared=False))
+    print("RMSE - ",mean_squared_error(func_regr_model.y_test, func_regr_model.predictions, squared=False))
 
     print("Baseline MAE - ",mean_absolute_error(func_regr_model.y_test, medians))
     print("MAE - ",mean_absolute_error(func_regr_model.y_test, func_regr_model.predictions))
@@ -281,14 +284,12 @@ def RFECVSelect(df,estimator=LinearRegression(), min_features_to_select=5, step=
     X_train, X_valid, Y_train, Y_valid = train_test_split(X, Y, train_size=0.8, test_size=0.2)
     rfe_selector.fit(X_train, Y_train)
     X_train = rfe_selector.transform(X_train.copy())
-    rfe_selector.get_support() #new_vector = [numWins, avgPointsScored, avgPointsAllowed, checkPower6Conference(team_id),
-    #                                         avgAssists, avgTurnovers, tournamentSeed, getTourneyAppearances(team_id),
-    #                                         totalPoss, totalfgmPerPoss, totalftmPerPoss, totaldrPerPoss, totalastPerPoss]
+    rfe_selector.get_support()
 
     logging.error(f"Finished RFECV in {time.time()-ts}")
+    print(rfe_selector.feature_names_in_[rfe_selector.support_ == False])
 
     return rfe_selector
-    print(rfe_selector.feature_names_in_[rfe_selector.support_ == False])
 
 def find_deals(realtor_obj,model,min_beds,min_sqrt,max_price,counties,state_abbr):
     """Find real estate deals based on specified criteria.

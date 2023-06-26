@@ -12,3 +12,5 @@ termcolor~=2.1.1
 matplotlib~=3.5.3
 seaborn~=0.12.1
 beautifulsoup4~=4.11.1
+streamlit~=1.23.1
+xgboost~=1.6.2

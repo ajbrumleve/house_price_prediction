@@ -170,12 +170,23 @@ class RealtorScraper:
         feature_dict_list = []
 
         for i in range(1, self.page_numbers):
-            json_data = self.send_request(page_number=i, offset_parameter=offset_parameter, state_abbr=state_abbr)
-            offset_parameter += 42
+            try:
+                json_data = self.send_request(page_number=i, offset_parameter=offset_parameter, state_abbr=state_abbr)
+                offset_parameter += 42
+            except Exception as e:
+                print(f"Error occurred while sending request: {str(e)}")
+                continue  # Skip to the next iteration
+
+            if json_data is None or "data" not in json_data or "home_search" not in json_data["data"]:
+                print(f"No valid data found in response for page {i}")
+                continue  # Skip to the next iteration
 
             for entry in json_data["data"]["home_search"]["results"]:
-                feature_dict = self.extract_features(entry)
-                feature_dict_list.append(feature_dict)
+                try:
+                    feature_dict = self.extract_features(entry)
+                    feature_dict_list.append(feature_dict)
+                except Exception as e:
+                    print(f"Error occurred while extracting features: {str(e)}")
 
         return feature_dict_list
 
@@ -249,6 +260,11 @@ class RealtorScraper:
         df_final = df_new.drop(object_cols, axis=1)
         df_final = df_final.drop('tags', axis=1)
         df_final = pd.concat([df_final, dummy_df], axis=1)
+        # Find duplicate column names
+        duplicate_columns = df_final.columns[df_final.columns.duplicated()]
+
+        # Drop one of the duplicate columns
+        df_final = df_final.drop(columns=duplicate_columns[0])
         return df_final, address_df, zip_df
 
 
