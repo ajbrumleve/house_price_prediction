@@ -18,7 +18,7 @@ def main():
 
     if submit:
         address_price = predict_specific_address(r, regr_model, zip_code, house_number)
-        if not address_price[1]:
+        if isinstance(address_price, str):
             st.write(address_price)
         elif address_price[0] > address_price[1]:
             st.write(f"The model predicts a price of \${address_price[1]}. The actual price is \${address_price[0]}. The house is \${address_price[0] - address_price[1]} more expensive than the prediction.")
