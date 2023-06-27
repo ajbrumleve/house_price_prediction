@@ -50,7 +50,7 @@ def logging_formatter(logger, name):
             logger = logging.getLogger("wxApp")
             logging_formatter(logger, "wxApp")
     """
-    fh = logging.FileHandler('logs/test-log.log')
+    fh = logging.FileHandler('logs/streamlit-log.log')
     fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     formatter = logging.Formatter(fmt)
     fh.setFormatter(formatter)
