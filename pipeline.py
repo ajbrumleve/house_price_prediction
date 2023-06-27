@@ -182,7 +182,7 @@ def predict_specific_address(realtor_object,model,zip,house_num):
                 zip_scraper.df[col] = slice[col].copy().iloc[:,0]
         else:
             zip_scraper.df[col] = 0
-    zip_scraper.df = zip_scraper.df[model.train.columns]
+    zip_scraper.df = zip_scraper.df[model.model.train.columns]
     try:
         zip_scraper.real_price = zip_scraper.df['price'].values[0]
     except IndexError as e:
