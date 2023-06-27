@@ -178,7 +178,11 @@ def predict_specific_address(realtor_object, model, zip, house_num):
     slice = slice[slice["address"].str.contains(str(house_num))].reset_index()
     if len(slice) <= 1:
         zip_scraper.df = pd.DataFrame()
-        address = slice["address"][0]
+        try:
+            address = slice["address"][0]
+        except IndexError as e:
+            print("The house number is not listed as for sale in the dataset")
+            return "The house number is not listed as for sale in the dataset"
         for col in zip_scraper.df_columns.copy():
             if col in slice.copy().columns:
                 try:
