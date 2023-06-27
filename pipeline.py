@@ -192,7 +192,7 @@ def predict_specific_address(realtor_object,model,zip,house_num):
     for col in zip_scraper.df.columns.copy():
         zip_scraper.df[col].copy().fillna(r.df[col].median(),inplace = True)
 
-    prediction = model.model.predict(zip_scraper.df)
+    prediction = model.model.model.predict(zip_scraper.df)
     return zip_scraper.real_price, int(prediction[0])
 
 # def filtered_list(realtor_object,model,zip_codes: list,min_bedrooms=3,min_sqft=1000,max_price=300000):
