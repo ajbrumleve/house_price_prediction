@@ -8,7 +8,7 @@ from pipeline import predict_specific_address
 def main():
     # take input from users using st.form function
     with st.form("Address Search"):
-        st.subheader("Please enter the following inputs:")
+        st.subheader("To compare the actual and predicted price of a house, please enter the following inputs:")
         # define variable to store user inputs
         zip_code = st.text_input("Zip code of the house:")
         house_number = st.text_input("House number of the house:")
