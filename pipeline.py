@@ -48,8 +48,9 @@ def get_realtor_object(state_abbr):
     pickle.dump(r, open(filename, 'wb'))
     return r
 
+
 @log
-def get_model(realtor_object,state_abbr,file_out=None, grid_search=False):
+def get_model(realtor_object, state_abbr, file_out=None, grid_search=False):
     """Retrieve a regression model using a RealtorScraper object.
 
         This function creates a regression model using the provided RealtorScraper object
@@ -91,7 +92,7 @@ def get_model(realtor_object,state_abbr,file_out=None, grid_search=False):
         regr_model.model = regr_model.grid_search()
     else:
         regr_model.model = RandomForestRegressor(n_estimators=300)
-    regr_model.model.fit(regr_model.X_train,regr_model.y_train)
+    regr_model.model.fit(regr_model.X_train, regr_model.y_train)
     realtor_object.model = regr_model
     if file_out is None:
         filename = f'{state_abbr}_realtor_model.sav'
@@ -99,6 +100,7 @@ def get_model(realtor_object,state_abbr,file_out=None, grid_search=False):
         filename = file_out
     pickle.dump(realtor_object, open(filename, 'wb'))
     return regr_model
+
 
 @log
 def evaluate_model(model):
@@ -123,17 +125,18 @@ def evaluate_model(model):
     func_regr_model.predictions = func_regr_model.model.predict(func_regr_model.X_test)
     medians = np.full((len(func_regr_model.y_test),), np.median(func_regr_model.y_train))
 
-    print("Baseline RMSE - ",mean_squared_error(func_regr_model.y_test, np.log(medians), squared=False))
-    print("RMSE - ",mean_squared_error(func_regr_model.y_test, func_regr_model.predictions, squared=False))
+    print("Baseline RMSE - ", mean_squared_error(func_regr_model.y_test, np.log(medians), squared=False))
+    print("RMSE - ", mean_squared_error(func_regr_model.y_test, func_regr_model.predictions, squared=False))
 
-    print("Baseline MAE - ",mean_absolute_error(func_regr_model.y_test, medians))
-    print("MAE - ",mean_absolute_error(func_regr_model.y_test, func_regr_model.predictions))
+    print("Baseline MAE - ", mean_absolute_error(func_regr_model.y_test, medians))
+    print("MAE - ", mean_absolute_error(func_regr_model.y_test, func_regr_model.predictions))
 
-    print("Baseline R2 - ",r2_score(func_regr_model.y_test, medians))
-    print("R2 - ",r2_score(func_regr_model.y_test, func_regr_model.predictions))
+    print("Baseline R2 - ", r2_score(func_regr_model.y_test, medians))
+    print("R2 - ", r2_score(func_regr_model.y_test, func_regr_model.predictions))
     logging.info(f"Model R2 is {r2_score(func_regr_model.y_test, func_regr_model.predictions)}")
 
     # importance = func_regr_model.check_importance()
+
 
 # @log
 # def find_zip_encoding(realtor_object,zip):
@@ -145,7 +148,7 @@ def evaluate_model(model):
 
 
 @log
-def predict_specific_address(realtor_object,model,zip,house_num):
+def predict_specific_address(realtor_object, model, zip, house_num):
     """Predict the price for a specific address.
 
         This function predicts the price for a specific address based on the provided
@@ -172,28 +175,33 @@ def predict_specific_address(realtor_object,model,zip,house_num):
     # slice = slice.rename(columns={"postal_code": encoded_zip})
     # slice[encoded_zip] = 1
     slice.dropna(subset=["address"], inplace=True)
-    slice = slice[slice["address"].str.contains(str(house_num))]
-    zip_scraper.df = pd.DataFrame()
-    for col in zip_scraper.df_columns.copy():
-        if col in slice.copy().columns:
-            try:
-                zip_scraper.df[col] = slice[col].copy()
-            except:
-                zip_scraper.df[col] = slice[col].copy().iloc[:,0]
-        else:
-            zip_scraper.df[col] = 0
-    zip_scraper.df = zip_scraper.df[model.model.train.columns]
-    try:
-        zip_scraper.real_price = zip_scraper.df['price'].values[0]
-    except IndexError as e:
-        print("The house number is not listed as for sale in the dataset")
-        return "The house number is not listed as for sale in the dataset"
-    zip_scraper.df = zip_scraper.df.drop(['price'], axis=1)
-    for col in zip_scraper.df.columns.copy():
-        zip_scraper.df[col].copy().fillna(r.df[col].median(),inplace = True)
+    slice = slice[slice["address"].str.contains(str(house_num))].reset_index()
+    if len(slice) == 1:
+        zip_scraper.df = pd.DataFrame()
+        address = slice["address"][0]
+        for col in zip_scraper.df_columns.copy():
+            if col in slice.copy().columns:
+                try:
+                    zip_scraper.df[col] = slice[col].copy()
+                except:
+                    zip_scraper.df[col] = slice[col].copy().iloc[:, 0]
+            else:
+                zip_scraper.df[col] = 0
+        zip_scraper.df = zip_scraper.df[model.model.train.columns]
+        try:
+            zip_scraper.real_price = zip_scraper.df['price'].values[0]
+        except IndexError as e:
+            print("The house number is not listed as for sale in the dataset")
+            return "The house number is not listed as for sale in the dataset"
+        zip_scraper.df = zip_scraper.df.drop(['price'], axis=1)
+        for col in zip_scraper.df.columns.copy():
+            zip_scraper.df[col].copy().fillna(r.df[col].median(), inplace=True)
 
-    prediction = model.model.model.predict(zip_scraper.df)
-    return zip_scraper.real_price, int(prediction[0])
+        prediction = model.model.model.predict(zip_scraper.df)
+        return zip_scraper.real_price, int(prediction[0])
+    else:
+        return f"There is more than one house for sale in {zip} with the house number {house_num}."
+
 
 # def filtered_list(realtor_object,model,zip_codes: list,min_bedrooms=3,min_sqft=1000,max_price=300000):
 #         df = realtor_object.df
@@ -251,7 +259,8 @@ def predict_specific_address(realtor_object,model,zip,house_num):
 #     return set(most_important_feats)
 
 
-def RFECVSelect(df,estimator=LinearRegression(), min_features_to_select=5, step=1, n_jobs=-1, scoring="neg_mean_absolute_error", cv=5):
+def RFECVSelect(df, estimator=LinearRegression(), min_features_to_select=5, step=1, n_jobs=-1,
+                scoring="neg_mean_absolute_error", cv=5):
     """Perform Recursive Feature Elimination with Cross-Validation (RFECV) on the given dataset.
 
         This function applies RFECV to select the optimal features for the given estimator.
@@ -274,7 +283,7 @@ def RFECVSelect(df,estimator=LinearRegression(), min_features_to_select=5, step=
             RFECVSelect(df, estimator=RandomForestRegressor(), min_features_to_select=10, step=2)
     """
     rfe_selector = RFECV(estimator=estimator, min_features_to_select=min_features_to_select, step=step,
-                         n_jobs=n_jobs, scoring=scoring, cv=cv,verbose=2)
+                         n_jobs=n_jobs, scoring=scoring, cv=cv, verbose=2)
     ts = time.time()
     X = df.drop(['price'], axis=1)
     Y = df['price']
@@ -286,12 +295,13 @@ def RFECVSelect(df,estimator=LinearRegression(), min_features_to_select=5, step=
     X_train = rfe_selector.transform(X_train.copy())
     rfe_selector.get_support()
 
-    logging.error(f"Finished RFECV in {time.time()-ts}")
+    logging.error(f"Finished RFECV in {time.time() - ts}")
     print(rfe_selector.feature_names_in_[rfe_selector.support_ == False])
 
     return rfe_selector
 
-def find_deals(realtor_obj,model,min_beds,min_sqrt,max_price,counties,state_abbr):
+
+def find_deals(realtor_obj, model, min_beds, min_sqrt, max_price, counties, state_abbr):
     """Find real estate deals based on specified criteria.
 
         This function takes a Realtor object, a predictive model, and various criteria such as minimum
@@ -321,7 +331,7 @@ def find_deals(realtor_obj,model,min_beds,min_sqrt,max_price,counties,state_abbr
     df_addresses = realtor_obj.address_df
     df_zips = realtor_obj.zips_df
     prices = df['price']
-    X = df.drop(["price"],axis=1)
+    X = df.drop(["price"], axis=1)
 
     predictions = model.model.predict(X)
     df['prediction'] = predictions
@@ -331,13 +341,15 @@ def find_deals(realtor_obj,model,min_beds,min_sqrt,max_price,counties,state_abbr
     df['city'] = df_addresses.city
     df['county'] = df_addresses.county
     df['postal_code'] = df_zips
-    df = df.copy().sort_values("price_diff",ascending=False)
+    df = df.copy().sort_values("price_diff", ascending=False)
     df_filtered = df[(df["beds"] >= min_beds) &
                      (df["sqft"] >= min_sqrt) &
                      (df['postal_code'].isin(zip_codes)) &
                      (df['price'] <= max_price)]
 
     return df_filtered
+
+
 def run():
     def run():
         """Run the program to scrape, build, and evaluate the model.
@@ -403,7 +415,7 @@ def run():
                 '%H:%M:%S.%f') + " - " + f"Dataset scraped in {timeit.default_timer() - t_section} seconds")
             t_section = timeit.default_timer()
             logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + f"Starting to build model")
-            regr_model = get_model(r,state_abbr)
+            regr_model = get_model(r, state_abbr)
             logging.info(datetime.now().strftime(
                 '%H:%M:%S.%f') + " - " + f"Model built in {timeit.default_timer() - t_section} seconds")
     elif prebuilt_model == False:
@@ -414,7 +426,7 @@ def run():
             '%H:%M:%S.%f') + " - " + f"Dataset scraped in {timeit.default_timer() - t_section} seconds")
         t_section = timeit.default_timer()
         logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + f"Starting to build model")
-        regr_model = get_model(r,state_abbr)
+        regr_model = get_model(r, state_abbr)
         logging.info(datetime.now().strftime(
             '%H:%M:%S.%f') + " - " + f"Model built in {timeit.default_timer() - t_section} seconds")
     else:
@@ -425,17 +437,18 @@ def run():
     evaluate_model(regr_model)
     zip = input("what is the zip code?")
     house_num = input("What is the house number?")
-    address_price = predict_specific_address(r,regr_model,zip,house_num)
+    address_price = predict_specific_address(r, regr_model, zip, house_num)
     try:
         if address_price[0] > address_price[1]:
-            print(f"The model predicts a price of {address_price[1]}. The actual price is {address_price[0]}. The house is {address_price[0]-address_price[1]} more expensive than the prediction.")
+            print(
+                f"The model predicts a price of {address_price[1]}. The actual price is {address_price[0]}. The house is {address_price[0] - address_price[1]} more expensive than the prediction.")
         elif address_price[0] < address_price[1]:
-            print(f"The model predicts a price of {address_price[1]}. The actual price is {address_price[0]}. The house is {address_price[1] - address_price[0]} cheaper than the prediction.")
+            print(
+                f"The model predicts a price of {address_price[1]}. The actual price is {address_price[0]}. The house is {address_price[1] - address_price[0]} cheaper than the prediction.")
         else:
             print(f"The model predicts the exact price of {address_price[0]}")
     except TypeError as e:
         logging.error(e)
-
 
     # zip_scraper = RealtorZipScraper(page_numbers=10,columns=r.df.columns)
     # for key,value in r.cat_maps["postal_code"].items():
@@ -455,6 +468,7 @@ def run():
     # zip_scraper.real_price = zip_scraper.df['price'].values[0]
     # zip_scraper.df = zip_scraper.df.drop(['price'],axis=1)
     #
+
 
 if __name__ == "__main__":
     logger = logging.getLogger("test")
@@ -493,7 +507,7 @@ if __name__ == "__main__":
                         '%H:%M:%S.%f') + " - " + f"Dataset scraped in {timeit.default_timer() - t_section} seconds")
                     t_section = timeit.default_timer()
                     logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + f"Starting to build model")
-                    regr_model = get_model(r,state_abbr)
+                    regr_model = get_model(r, state_abbr)
                     evaluate_model(regr_model)
                     logging.info(datetime.now().strftime(
                         '%H:%M:%S.%f') + " - " + f"Model built in {timeit.default_timer() - t_section} seconds")
@@ -541,7 +555,7 @@ if __name__ == "__main__":
                             print(f"The model predicts the exact price of ${address_price[0]}")
                     except TypeError as e:
                         logging.error(e)
-                elif repeat =="N":
+                elif repeat == "N":
                     break
         elif menu_1 == "2":
             min_beds = float(input("What is the minimum number of bedrooms? "))
@@ -557,11 +571,10 @@ if __name__ == "__main__":
                     counties.append(county)
             state_abbr = input("What state are these counties in? eg MO ")
 
-            filtered_df = find_deals(r,regr_model,min_beds,min_sqft,max_price,counties,state_abbr)
+            filtered_df = find_deals(r, regr_model, min_beds, min_sqft, max_price, counties, state_abbr)
             out_file = input("Where do you want to save the csv?")
             filtered_df.to_csv(out_file)
         elif menu_1 == "break":
             break
         else:
             print("Choose 1 or 2.")
-
