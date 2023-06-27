@@ -180,7 +180,7 @@ def predict_specific_address(realtor_object, model, zip, house_num):
         zip_scraper.df = pd.DataFrame()
         try:
             address = slice["address"][0]
-        except IndexError as e:
+        except KeyError as e:
             print("The house number is not listed as for sale in the dataset")
             return "The house number is not listed as for sale in the dataset"
         for col in zip_scraper.df_columns.copy():
