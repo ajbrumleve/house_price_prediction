@@ -23,7 +23,7 @@ def main():
             st.write(address_price)
         elif address_price[0] > address_price[1]:
             st.write(
-                f"The model predicts a price of ${address_price[1]}. The actual price is ${address_price[0]}. The house is {address_price[0] - address_price[1]} more expensive than the prediction.")
+                f"The model predicts a price of \${address_price[1]}. The actual price is \${address_price[0]}. The house is {address_price[0] - address_price[1]} more expensive than the prediction.")
         elif address_price[0] < address_price[1]:
             st.write(
                 f"The model predicts a price of ${int(address_price[1])}. The actual price is ${int(address_price[0])}. The house is {int(address_price[1]) - int(address_price[0])} cheaper than the prediction.")
