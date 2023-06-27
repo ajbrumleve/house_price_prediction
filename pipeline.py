@@ -176,7 +176,7 @@ def predict_specific_address(realtor_object, model, zip, house_num):
     # slice[encoded_zip] = 1
     slice.dropna(subset=["address"], inplace=True)
     slice = slice[slice["address"].str.contains(str(house_num))].reset_index()
-    if len(slice) == 1:
+    if len(slice) <= 1:
         zip_scraper.df = pd.DataFrame()
         address = slice["address"][0]
         for col in zip_scraper.df_columns.copy():
