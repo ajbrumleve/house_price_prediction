@@ -7,6 +7,8 @@ from bs4 import BeautifulSoup
 from termcolor import colored as cl  # text customization
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+from config import MAX_ERRORS
 from logging_decorator import *
 
 
@@ -169,24 +171,45 @@ class RealtorScraper:
 
         feature_dict_list = []
 
-        for i in range(1, self.page_numbers):
+        page_number = 1
+        error_count = 0
+
+        while True:
             try:
-                json_data = self.send_request(page_number=i, offset_parameter=offset_parameter, state_abbr=state_abbr)
+                json_data = self.send_request(page_number=page_number, offset_parameter=offset_parameter,
+                                              state_abbr=state_abbr)
                 offset_parameter += 42
+                # error_count = 0  # Reset the error count if a successful request is made
             except Exception as e:
                 print(f"Error occurred while sending request: {str(e)}")
-                continue  # Skip to the next iteration
+                error_count += 1
+                if error_count > MAX_ERRORS:
+                    print("Maximum error count reached. Exiting loop.")
+                    break  # Exit the loop if the maximum error count is reached
+
+                continue  # Skip to the next iteration if there was an error
 
             if json_data is None or "data" not in json_data or "home_search" not in json_data["data"]:
-                print(f"No valid data found in response for page {i}")
-                continue  # Skip to the next iteration
+                print(f"No valid data found in response for page {page_number}")
+                error_count += 1
+                if error_count > MAX_ERRORS:
+                    print("Maximum error count reached. Exiting loop.")
+                    break  # Exit the loop if the maximum error count is reached
 
-            for entry in json_data["data"]["home_search"]["results"]:
-                try:
+                continue  # Skip to the next iteration if there is no valid data on the current page
+
+            try:
+                for entry in json_data["data"]["home_search"]["results"]:
                     feature_dict = self.extract_features(entry)
                     feature_dict_list.append(feature_dict)
-                except Exception as e:
-                    print(f"Error occurred while extracting features: {str(e)}")
+            except Exception as e:
+                print(f"Error occurred while extracting features: {str(e)}")
+                error_count += 1
+                if error_count > MAX_ERRORS:
+                    print("Maximum error count reached. Exiting loop.")
+                    break  # Exit the loop if the maximum error count is reached
+            # Increment the page number for the next iteration
+            page_number += 1
 
         return feature_dict_list
 

@@ -44,7 +44,7 @@ def get_realtor_object(state_abbr):
     except Exception as e:
         logging.error(e)
         return
-    filename = 'RealtorObject.sav'
+    filename = f'models/{state_abbr}_RealtorObject.sav'
     pickle.dump(r, open(filename, 'wb'))
     return r
 
@@ -95,7 +95,7 @@ def get_model(realtor_object, state_abbr, file_out=None, grid_search=False):
     regr_model.model.fit(regr_model.X_train, regr_model.y_train)
     realtor_object.model = regr_model
     if file_out is None:
-        filename = f'{state_abbr}_realtor_model.sav'
+        filename = f'models/{state_abbr}_realtor_model.sav'
     else:
         filename = file_out
     pickle.dump(realtor_object, open(filename, 'wb'))
@@ -263,8 +263,8 @@ def predict_specific_address(realtor_object, model, zip, house_num):
 #     return set(most_important_feats)
 
 
-def RFECVSelect(df, estimator=LinearRegression(), min_features_to_select=5, step=1, n_jobs=-1,
-                scoring="neg_mean_absolute_error", cv=5):
+def RFECVSelect(df, estimator=RandomForestRegressor(max_depth=None, n_estimators=200), min_features_to_select=5, step=5, n_jobs=-1,
+                scoring="r2", cv=5):
     """Perform Recursive Feature Elimination with Cross-Validation (RFECV) on the given dataset.
 
         This function applies RFECV to select the optimal features for the given estimator.
