@@ -24,10 +24,10 @@ def confirm_state():
             df_filename = f'models/{state}_RealtorObject.sav'
             regression_model = pickle.load(open(model_filename, 'rb'))
             real_obj = pickle.load(open(df_filename, 'rb'))
-            main()
+            main(real_obj, regression_model, state)
         else:
             st.write("File does not exist.")
-        return real_obj, regression_model, state
+
 def main(r, regr_model, state_abbr):
     # take input from users using st.form function
     with st.form("Address Search"):
@@ -54,6 +54,6 @@ def main(r, regr_model, state_abbr):
 
 
 if __name__ == '__main__':
-    r, regr_model, state_abbr = confirm_state()
-    main(r, regr_model, state_abbr)
+    confirm_state()
+    # main(r, regr_model, state_abbr)
 
