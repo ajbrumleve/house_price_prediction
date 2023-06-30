@@ -10,7 +10,7 @@ from zips import Zips
 states = config.STATE_ABBR
 
 # Define the available activities
-activities = ["Look up a house", "Create filtered dataframe"]
+activities = ["Look up a house", "Create filtered table"]
 
 # Function to handle "Look up a house" activity
 def look_up_house():
@@ -41,7 +41,7 @@ def look_up_house():
 
 # Function to handle "Create filtered dataframe" activity
 def create_filtered_dataframe():
-    st.subheader("Create filtered dataframe")
+    st.subheader("Create filtered table")
     # Get user inputs (e.g., filters)
     min_bedrooms = st.slider("Minimum bedrooms", 1, 5, 1)
     min_sqft = st.slider("Minimum square footage", 100, 2000, 100)
@@ -62,6 +62,7 @@ def create_filtered_dataframe():
 # Main program
 def main():
     # Initialize session state
+    st.header("House Price Predictor")
     if "state" not in st.session_state:
         st.session_state["state"] = None
 
@@ -90,7 +91,7 @@ def main():
         current_activity = st.session_state.get("activity")
         if current_activity == "Look up a house":
             look_up_house()
-        elif current_activity == "Create filtered dataframe":
+        elif current_activity == "Create filtered table":
             create_filtered_dataframe()
 
 
