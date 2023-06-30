@@ -69,6 +69,7 @@ def make_choice(r, regr_model, state_abbr):
         else:
             # Logic for showing a filtered table of all houses
             st.write("You selected: See filtered table of all houses")
+    return "","","",""
 
 if __name__ == '__main__':
     real_obj, regression_model, state, status = confirm_state()
