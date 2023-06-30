@@ -59,17 +59,17 @@ def make_choice(r, regr_model, state_abbr):
         choice = st.selectbox("Select an option:", ["Look up a house", "See filtered table of all houses"])
         submit3 = st.form_submit_button("Submit")
 
-        if submit3:
+    if submit3:
 
-            if choice == "Look up a house":
-                # Logic for looking up a specific house
-                main(r, regr_model, state_abbr)
+        if choice == "Look up a house":
+            # Logic for looking up a specific house
+            main(r, regr_model, state_abbr)
 
-            else:
-                # Logic for showing a filtered table of all houses
-                # ...
-                st.write("You selected: See filtered table of all houses")
-                # ...
+        else:
+            # Logic for showing a filtered table of all houses
+            # ...
+            st.write("You selected: See filtered table of all houses")
+            # ...
 
 if __name__ == '__main__':
     confirm_state()
