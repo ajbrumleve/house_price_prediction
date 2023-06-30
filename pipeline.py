@@ -172,15 +172,19 @@ def predict_specific_address(realtor_object, model, zip, house_num):
     zip_scraper = RealtorZipScraper(page_numbers=10, columns=r.df.columns.union(['address']))
     # encoded_zip = find_zip_encoding(r,zip)
     if zip == "":
+        print("1")
         slice = r.df
         slice['address'] = r.address_df['address']
 
     else:
+        print("2")
         slice = zip_scraper.create_dataframe(zip)
     # slice = slice.rename(columns={"postal_code": encoded_zip})
     # slice[encoded_zip] = 1
     slice.dropna(subset=["address"], inplace=True)
+    print("3")
     slice = slice[slice["address"].str.contains(str(house_num))].reset_index()
+    print("4",len(slice))
     if len(slice) <= 1:
         zip_scraper.df = pd.DataFrame()
         try:
@@ -196,17 +200,24 @@ def predict_specific_address(realtor_object, model, zip, house_num):
                     zip_scraper.df[col] = slice[col].copy().iloc[:, 0]
             else:
                 zip_scraper.df[col] = 0
-        zip_scraper.df = zip_scraper.df[model.train.columns]
+        print("5")
+        zip_scraper.df = zip_scraper.df[model.model.train.columns]
+        print("5.5")
         try:
+            print("5.75")
             zip_scraper.real_price = zip_scraper.df['price'].values[0]
+            print("6")
         except IndexError as e:
             print("The house number is not listed as for sale in the dataset")
             return "The house number is not listed as for sale in the dataset"
+        print("7")
         zip_scraper.df = zip_scraper.df.drop(['price'], axis=1)
+        print("8")
         for col in zip_scraper.df.columns.copy():
             zip_scraper.df[col].copy().fillna(r.df[col].median(), inplace=True)
-
-        prediction = model.model.predict(zip_scraper.df)
+        print("9")
+        prediction = model.model.model.predict(zip_scraper.df)
+        print(prediction)
         return zip_scraper.real_price, int(prediction[0])
     else:
         return f"There is more than one house for sale in {zip} with the house number {house_num}."
