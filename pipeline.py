@@ -337,7 +337,7 @@ def find_deals(realtor_obj, model, min_beds, min_sqrt, max_price, counties, stat
     prices = df['price']
     X = df.drop(["price"], axis=1)
 
-    predictions = model.model.predict(X)
+    predictions = model.model.model.predict(X)
     df['prediction'] = predictions
     df['price'] = prices
     df['price_diff'] = df['prediction'] - df['price']

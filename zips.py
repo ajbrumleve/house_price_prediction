@@ -60,3 +60,10 @@ class Zips:
         # Return the sorted list of zip codes
         return total_list
 
+    def get_county_list(self):
+        zips = pd.read_csv('files/zip_codes.csv')
+        zips_f = zips[zips["state_abbr"] == self.state_abbr]
+        county_series = zips_f['county']
+        county_choices = list(set(county_series))
+        county_choices.sort()
+        return county_choices
