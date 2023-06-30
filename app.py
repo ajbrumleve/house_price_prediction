@@ -38,7 +38,7 @@ def main(r, regr_model, state_abbr):
         print(possible_zips[:10])
         print(addresses[:10])
         zip_code = st.selectbox("Zip code of the house:",possible_zips)
-        house_number = st.text_input("House number of the house:",addresses)
+        house_number = st.selectbox("House number of the house:",addresses)
 
         # put a submit button to predict the output of the model
         submit2 = st.form_submit_button("Predict")
