@@ -15,7 +15,7 @@ def confirm_state():
         state = st.selectbox("State Abbreviation", STATE_ABBR)
 
         # put a submit button to predict the output of the model
-        submit = st.form_submit_button("Predict")
+        submit = st.form_submit_button("Submit")
     if submit:
         filename = f'models/{state}_realtor_model.sav'
         if os.path.exists(filename):
@@ -35,13 +35,15 @@ def main(r, regr_model, state_abbr):
         # define variable to store user inputs
         possible_zips = r.zips_df
         addresses = r.address_df["address"]
+        print(possible_zips[:10])
+        print(addresses[:10])
         zip_code = st.selectbox("Zip code of the house:",possible_zips)
         house_number = st.text_input("House number of the house:",addresses)
 
         # put a submit button to predict the output of the model
-        submit = st.form_submit_button("Predict")
+        submit2 = st.form_submit_button("Predict")
 
-    if submit:
+    if submit2:
         address_price = predict_specific_address(r, regr_model, zip_code, house_number)
         if isinstance(address_price, str):
             st.write(address_price)
