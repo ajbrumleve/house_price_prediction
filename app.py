@@ -16,6 +16,7 @@ def confirm_state():
 
         # put a submit button to predict the output of the model
         submit = st.form_submit_button("Submit")
+
     if submit:
         filename = f'models/{state}_realtor_model.sav'
         if os.path.exists(filename):
@@ -23,11 +24,10 @@ def confirm_state():
             df_filename = f'models/{state}_RealtorObject.sav'
             regression_model = pickle.load(open(model_filename, 'rb'))
             real_obj = pickle.load(open(df_filename, 'rb'))
-            make_choice(real_obj,regression_model,state)
+            make_choice(real_obj, regression_model, state)
 
         else:
             st.write("File does not exist.")
-
 def main(r, regr_model, state_abbr):
     # take input from users using st.form function
     with st.form("Address Search"):
@@ -55,22 +55,19 @@ def main(r, regr_model, state_abbr):
             st.write(f"The model predicts the exact price of \${address_price[0]}")
 
 def make_choice(r, regr_model, state_abbr):
-    with st.form("Choose App"):
-        choice = st.radio("Select an option:", ["Look up a house", "See filtered table of all houses"])
-        submit3 = st.form_submit_button("Submit")
+    st.subheader("Choose an App:")
+    choice = st.radio("Select an option:", ["Look up a house", "See filtered table of all houses"])
+    submit3 = st.button("Submit")
 
     if submit3:
         if choice == "Look up a house":
             # Logic for looking up a specific house
-            st.write("look up house")
+            st.write("Look up house")
             # main(r, regr_model, state_abbr)
 
         else:
             # Logic for showing a filtered table of all houses
-            # ...
             st.write("You selected: See filtered table of all houses")
-            # ...
-
 
 if __name__ == '__main__':
     confirm_state()
