@@ -74,17 +74,22 @@ def make_choice():
     return "","","",""
 
 if __name__ == '__main__':
-    if 'section' not in st.session_state:
-        st.session_state['section'] = 'section 1'
-    if st.session_state['section'] == 'section 1':
-        confirm_state()
-    if st.session_state['section'] == 'section 2':
-        make_choice()
-    if st.session_state['section'] == 'section 3':
-        main(st.session_state["data 1"]['r'],st.session_state["data 1"]['model'],st.session_state["data 1"]['state'])
-    if st.session_state['section'] == 'section 4':
-        st.write("You selected: See filtered table of all houses")
+    # if 'section' not in st.session_state:
+    #     st.session_state['section'] = 'section 1'
+    # if st.session_state['section'] == 'section 1':
+    #     confirm_state()
+    # if st.session_state['section'] == 'section 2':
+    #     make_choice()
+    # if st.session_state['section'] == 'section 3':
+    #     main(st.session_state["data 1"]['r'],st.session_state["data 1"]['model'],st.session_state["data 1"]['state'])
+    # if st.session_state['section'] == 'section 4':
+    #     st.write("You selected: See filtered table of all houses")
     # if status == "confirmed":
     #     make_choice(real_obj, regression_model, state)
-    # # main(r, regr_model, state_abbr)
+    state = "AZ"
+    model_filename = f'models/{state}_realtor_model.sav'
+    df_filename = f'models/{state}_RealtorObject.sav'
+    regression_model = pickle.load(open(model_filename, 'rb'))
+    real_obj = pickle.load(open(df_filename, 'rb'))
+    main(real_obj, regression_model, state)
 
