@@ -64,12 +64,13 @@ def make_choice():
     if submit3:
         if choice == "Look up a house":
             # Logic for looking up a specific house
-            st.write("Look up house")
+            st.session_state['section'] = 'section 2'
             # main(r, regr_model, state_abbr)
 
         else:
             # Logic for showing a filtered table of all houses
-            st.write("You selected: See filtered table of all houses")
+            st.session_state['section'] = 'section 4'
+
     return "","","",""
 
 if __name__ == '__main__':
@@ -79,6 +80,10 @@ if __name__ == '__main__':
         confirm_state()
     if st.session_state['section'] == 'section 2':
         make_choice()
+    if st.session_state['section'] == 'section 3':
+        main(st.session_state["data 1"]['r'],st.session_state["data 1"]['model'],st.session_state["data 1"]['state'])
+    if st.session_state['section'] == 'section 4':
+        st.write("You selected: See filtered table of all houses")
     # if status == "confirmed":
     #     make_choice(real_obj, regression_model, state)
     # # main(r, regr_model, state_abbr)
