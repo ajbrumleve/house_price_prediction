@@ -1,43 +1,22 @@
-import os
 import pickle
 
 import streamlit as st
 
+import config
 from pipeline import predict_specific_address, find_deals
-from config import STATE_ABBR
 from zips import Zips
 
+# Define the available states
+states = config.STATE_ABBR
 
-# Function to load the regression model and data based on the selected state
-def load_data(state):
-    try:
-        model_filename = f'models/{state}_realtor_model.sav'
-        df_filename = f'models/{state}_RealtorObject.sav'
-        regression_model = pickle.load(open(model_filename, 'rb'))
-        real_obj = pickle.load(open(df_filename, 'rb'))
-        return real_obj, regression_model
-    except:
-        if state == "":
-            pass
-        else:
-            st.write(f"Model not available for {state}")
+# Define the available activities
+activities = ["Look up a house", "Create filtered dataframe"]
 
-
-# Function to get user inputs for state and activity choice
-def get_user_inputs():
-    st.subheader("Models are trained for each state. What state are you interested in?")
-    state = st.selectbox("State Abbreviation", STATE_ABBR)
-
-    st.subheader("Choose an activity:")
-    choice = st.radio("Select an option:", ["Look up a house", "See filtered table of all houses"])
-    if st.button("Submit"):
-        return state, choice
-    return "", "Look up a house"
-
-
-# Function to predict the price for a specific address
-def predict_price(real_obj, regression_model):
+# Function to handle "Look up a house" activity
+def look_up_house():
     st.subheader("To compare the actual and predicted price of a house, please enter the following inputs:")
+    real_obj = st.session_state['real_obj']
+    regression_model = st.session_state['regression_model']
     possible_zips = real_obj.zips_df
     addresses = real_obj.address_df["address"]
     zip_code = st.selectbox("Zip code of the house:", possible_zips)
@@ -60,39 +39,60 @@ def predict_price(real_obj, regression_model):
         else:
             st.write("Address not found")
 
-
-def get_filter_inputs(r, model, state):
-    st.subheader("Enter the filter criteria:")
-    county_choices = Zips([],state).get_county_list()
-    min_beds = st.number_input("Minimum Bedrooms", min_value=0, step=1, value=0)
-    min_sqft = st.number_input("Minimum Square Footage", min_value=0, step=1, value=0)
-    max_price = st.number_input("Maximum Price", min_value=0, step=1, value=0)
-    counties = st.multiselect("Counties", county_choices)
-
+# Function to handle "Create filtered dataframe" activity
+def create_filtered_dataframe():
+    st.subheader("Create filtered dataframe")
+    # Get user inputs (e.g., filters)
+    min_bedrooms = st.slider("Minimum bedrooms", 1, 5, 1)
+    min_sqft = st.slider("Minimum square footage", 100, 2000, 100)
+    max_price = st.slider("Maximum price", 100000, 1000000, 100000)
+    counties = st.multiselect("Counties", st.session_state['county_choices'])
+    real_obj = st.session_state['real_obj']
+    regression_model = st.session_state['regression_model']
     submit = st.button("Search")
 
     if submit:
         # Call the find_deals() function with the user inputs
-        filtered_df = find_deals(r, model, min_beds, min_sqft, max_price, counties, state)
+        filtered_df = find_deals(real_obj, regression_model, min_bedrooms, min_sqft, max_price, counties, st.session_state['state'])
+        selected_columns = ['address', 'city', 'county','postal_code','beds','baths','sqft','lot_sqft','price','prediction','price_diff']
         # Display the filtered table of houses
-        st.dataframe(filtered_df)
+        st.dataframe(filtered_df[selected_columns])
 
-
+# Main program
 def main():
-    state, choice = get_user_inputs()
-    try:
-        real_obj, regression_model = load_data(state)
+    # Initialize session state
+    if "state" not in st.session_state:
+        st.session_state["state"] = None
 
-        if choice == "Look up a house":
-            try:
-                predict_price(real_obj, regression_model)
-            except:
-                pass
-        elif choice == "See filtered table of all houses":
-            get_filter_inputs(real_obj, regression_model, state)
-    except:
-        pass
+    # Get user state input
+    state = st.selectbox("Select your state", states)
+
+    if st.button("Submit State"):
+        st.session_state["state"] = state
+
+    # Check the current state
+    current_state = st.session_state["state"]
 
 
-if __name__ == '__main__':
+    # Display appropriate activity based on the state
+    if current_state is None:
+        st.write("Please select a state.")
+    else:
+        model_filename = f'models/{current_state}_realtor_model.sav'
+        df_filename = f'models/{current_state}_RealtorObject.sav'
+        st.session_state['regression_model'] = pickle.load(open(model_filename, 'rb'))
+        st.session_state['real_obj'] = pickle.load(open(df_filename, 'rb'))
+        st.session_state['county_choices'] = Zips([], current_state).get_county_list()
+        activity = st.selectbox("Select an activity", activities)
+        # if st.button("Submit Activity"):
+        st.session_state["activity"] = activity
+        current_activity = st.session_state.get("activity")
+        if current_activity == "Look up a house":
+            look_up_house()
+        elif current_activity == "Create filtered dataframe":
+            create_filtered_dataframe()
+
+
+# Run the main program
+if __name__ == "__main__":
     main()
