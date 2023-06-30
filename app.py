@@ -24,7 +24,8 @@ def confirm_state():
             df_filename = f'models/{state}_RealtorObject.sav'
             regression_model = pickle.load(open(model_filename, 'rb'))
             real_obj = pickle.load(open(df_filename, 'rb'))
-            make_choice(real_obj, regression_model, state)
+
+            return real_obj, regression_model, state,"confirmed"
 
         else:
             st.write("File does not exist.")
@@ -70,6 +71,8 @@ def make_choice(r, regr_model, state_abbr):
             st.write("You selected: See filtered table of all houses")
 
 if __name__ == '__main__':
-    confirm_state()
+    real_obj, regression_model, state, status = confirm_state()
+    if status == "confirmed":
+        make_choice(real_obj, regression_model, state)
     # main(r, regr_model, state_abbr)
 
