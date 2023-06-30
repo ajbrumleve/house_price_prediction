@@ -30,12 +30,12 @@ def look_up_house():
             st.write(address_price)
         elif address_price[0] > address_price[1]:
             st.write(
-                f"The model predicts a price of ${address_price[1]}. The actual price is ${address_price[0]}. The house is ${address_price[0] - address_price[1]} more expensive than the prediction.")
+                f"The model predicts a price of \${address_price[1]}. The actual price is \${address_price[0]}. The house is \${address_price[0] - address_price[1]} more expensive than the prediction.")
         elif address_price[0] < address_price[1]:
             st.write(
-                f"The model predicts a price of ${int(address_price[1])}. The actual price is ${int(address_price[0])}. The house is ${int(address_price[1]) - int(address_price[0])} cheaper than the prediction.")
+                f"The model predicts a price of \${int(address_price[1])}. The actual price is \${int(address_price[0])}. The house is \${int(address_price[1]) - int(address_price[0])} cheaper than the prediction.")
         elif address_price[0] == address_price[1]:
-            st.write(f"The model predicts the exact price of ${address_price[0]}")
+            st.write(f"The model predicts the exact price of \${address_price[0]}")
         else:
             st.write("Address not found")
 
@@ -56,7 +56,7 @@ def create_filtered_dataframe():
         filtered_df = find_deals(real_obj, regression_model, min_bedrooms, min_sqft, max_price, counties, st.session_state['state'])
         selected_columns = ['address', 'city', 'county','postal_code','beds','baths','sqft','lot_sqft','price','prediction','price_diff']
         # Display the filtered table of houses
-        st.dataframe(filtered_df[selected_columns])
+        st.table(filtered_df[selected_columns])
 
 # Main program
 def main():
