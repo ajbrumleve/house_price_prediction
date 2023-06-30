@@ -77,9 +77,9 @@ if __name__ == '__main__':
         st.session_state['section'] = 'section 1'
     if st.session_state['section'] == 'section 1':
         confirm_state()
-    if st.session_state['section'] == 'section 2:
+    if st.session_state['section'] == 'section 2':
         make_choice()
-    if status == "confirmed":
-        make_choice(real_obj, regression_model, state)
-    # main(r, regr_model, state_abbr)
+    # if status == "confirmed":
+    #     make_choice(real_obj, regression_model, state)
+    # # main(r, regr_model, state_abbr)
 
