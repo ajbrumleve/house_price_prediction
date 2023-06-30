@@ -55,18 +55,9 @@ def create_filtered_dataframe():
         # Call the find_deals() function with the user inputs
         filtered_df = find_deals(real_obj, regression_model, min_bedrooms, min_sqft, max_price, counties, st.session_state['state'])
         selected_columns = ['address', 'city', 'county','postal_code','beds','baths','sqft','lot_sqft','price','prediction','price_diff']
-        # CSS to inject contained in a string
-        hide_dataframe_row_index = """
-                    <style>
-                    .row_heading.level0 {display:none}
-                    .blank {display:none}
-                    </style>
-                    """
 
-        # Inject CSS with Markdown
-        st.markdown(hide_dataframe_row_index, unsafe_allow_html=True)
         # Display the filtered table of houses
-        st.dataframe(filtered_df[selected_columns])
+        st.dataframe(filtered_df[selected_columns],hide_index=True)
 
 # Main program
 def main():
