@@ -24,7 +24,8 @@ def confirm_state():
             df_filename = f'models/{state}_RealtorObject.sav'
             regression_model = pickle.load(open(model_filename, 'rb'))
             real_obj = pickle.load(open(df_filename, 'rb'))
-
+            st.session_state['data_1'] = {"r":real_obj, "model":regression_model, "state":state}
+            st.session_state['section'] = 'section 2'
             return real_obj, regression_model, state,"confirmed"
 
         else:
@@ -72,7 +73,12 @@ def make_choice(r, regr_model, state_abbr):
     return "","","",""
 
 if __name__ == '__main__':
-    real_obj, regression_model, state, status = confirm_state()
+    if 'section' not in st.session_state:
+        st.session_state['section'] = 'section 1'
+    if st.session_state['section'] == 'section 1':
+        confirm_state()
+    if st.session_state['section'] == 'section 2:
+        make_choice()
     if status == "confirmed":
         make_choice(real_obj, regression_model, state)
     # main(r, regr_model, state_abbr)
