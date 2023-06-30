@@ -56,7 +56,7 @@ def main(r, regr_model, state_abbr):
         elif address_price[0] == address_price[1]:
             st.write(f"The model predicts the exact price of \${address_price[0]}")
 
-def make_choice(r, regr_model, state_abbr):
+def make_choice():
     st.subheader("Choose an App:")
     choice = st.radio("Select an option:", ["Look up a house", "See filtered table of all houses"])
     submit3 = st.button("Submit")
