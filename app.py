@@ -23,7 +23,7 @@ def confirm_state():
             df_filename = f'models/{state}_RealtorObject.sav'
             regression_model = pickle.load(open(model_filename, 'rb'))
             real_obj = pickle.load(open(df_filename, 'rb'))
-            choice = st.selectbox("Select an option:", ["Look up a house", "See filtered table of all houses"])
+            choice = st.selectbox("Select an option:", ["","Look up a house", "See filtered table of all houses"])
 
             if choice == "Look up a house":
                 # Logic for looking up a specific house
