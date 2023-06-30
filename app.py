@@ -12,6 +12,8 @@ def confirm_state():
     st.subheader("Models are trained for each state. What state are you interested in?")
     # define variable to store user inputs
     state = st.selectbox("State Abbreviation", STATE_ABBR)
+    choice = st.radio("Select an option:", ["Look up a house", "See filtered table of all houses"])
+
 
     # put a submit button to predict the output of the model
 
@@ -24,7 +26,10 @@ def confirm_state():
             regression_model = pickle.load(open(model_filename, 'rb'))
             real_obj = pickle.load(open(df_filename, 'rb'))
             st.session_state['data_1'] = {"r": real_obj, "model": regression_model, "state": state}
-            make_choice()
+            if choice == "Look up a house":
+                main(real_obj,regression_model,state)
+            elif choice == "See filtered table of all houses":
+                st.write("not available")
 
         else:
             st.write("File does not exist.")
@@ -61,7 +66,6 @@ def main(r, regr_model, state_abbr):
 
 def make_choice():
     st.subheader("Choose an App:")
-    choice = st.radio("Select an option:", ["Look up a house", "See filtered table of all houses"])
     submit3 = st.button("Submit")
 
     if submit3:
