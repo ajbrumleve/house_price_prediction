@@ -37,18 +37,18 @@ def confirm_state():
 
 def main(r, regr_model, state_abbr):
     # take input from users using st.form function
-    with st.form("Address Search"):
-        st.subheader("To compare the actual and predicted price of a house, please enter the following inputs:")
-        # define variable to store user inputs
-        possible_zips = r.zips_df
-        addresses = r.address_df["address"]
-        print(possible_zips[:10])
-        print(addresses[:10])
-        zip_code = st.selectbox("Zip code of the house:", possible_zips)
-        house_number = st.selectbox("House number of the house:", addresses)
 
-        # put a submit button to predict the output of the model
-        submit2 = st.form_submit_button("Predict")
+    st.subheader("To compare the actual and predicted price of a house, please enter the following inputs:")
+    # define variable to store user inputs
+    possible_zips = r.zips_df
+    addresses = r.address_df["address"]
+    print(possible_zips[:10])
+    print(addresses[:10])
+    zip_code = st.selectbox("Zip code of the house:", possible_zips)
+    house_number = st.selectbox("House number of the house:", addresses)
+
+    # put a submit button to predict the output of the model
+    submit2 = st.button("Predict")
 
     if submit2:
         address_price = predict_specific_address(r, regr_model, zip_code, house_number)
@@ -62,6 +62,8 @@ def main(r, regr_model, state_abbr):
                 f"The model predicts a price of \${int(address_price[1])}. The actual price is \${int(address_price[0])}. The house is \${int(address_price[1]) - int(address_price[0])} cheaper than the prediction.")
         elif address_price[0] == address_price[1]:
             st.write(f"The model predicts the exact price of \${address_price[0]}")
+        else:
+            st.write("address not found")
 
 
 def make_choice():
