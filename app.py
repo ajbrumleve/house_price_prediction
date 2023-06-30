@@ -19,7 +19,8 @@ def look_up_house():
     regression_model = st.session_state['regression_model']
     possible_zips = real_obj.zips_df
     addresses = real_obj.address_df["address"]
-    zip_code = st.selectbox("Zip code of the house:", possible_zips)
+    # zip_code = st.selectbox("Zip code of the house:", possible_zips)
+    zip_code = ""
     house_number = st.selectbox("House number of the house:", addresses)
 
     submit = st.button("Predict")

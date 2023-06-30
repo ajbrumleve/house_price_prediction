@@ -171,7 +171,12 @@ def predict_specific_address(realtor_object, model, zip, house_num):
 
     zip_scraper = RealtorZipScraper(page_numbers=10, columns=r.df.columns.union(['address']))
     # encoded_zip = find_zip_encoding(r,zip)
-    slice = zip_scraper.create_dataframe(zip)
+    if zip == "":
+        slice = r.df
+        slice['address'] = r.address_df['address']
+
+    else:
+        slice = zip_scraper.create_dataframe(zip)
     # slice = slice.rename(columns={"postal_code": encoded_zip})
     # slice[encoded_zip] = 1
     slice.dropna(subset=["address"], inplace=True)
@@ -191,7 +196,7 @@ def predict_specific_address(realtor_object, model, zip, house_num):
                     zip_scraper.df[col] = slice[col].copy().iloc[:, 0]
             else:
                 zip_scraper.df[col] = 0
-        zip_scraper.df = zip_scraper.df[model.model.train.columns]
+        zip_scraper.df = zip_scraper.df[model.train.columns]
         try:
             zip_scraper.real_price = zip_scraper.df['price'].values[0]
         except IndexError as e:
@@ -201,7 +206,7 @@ def predict_specific_address(realtor_object, model, zip, house_num):
         for col in zip_scraper.df.columns.copy():
             zip_scraper.df[col].copy().fillna(r.df[col].median(), inplace=True)
 
-        prediction = model.model.model.predict(zip_scraper.df)
+        prediction = model.model.predict(zip_scraper.df)
         return zip_scraper.real_price, int(prediction[0])
     else:
         return f"There is more than one house for sale in {zip} with the house number {house_num}."
