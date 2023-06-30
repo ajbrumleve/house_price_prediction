@@ -56,7 +56,7 @@ def main(r, regr_model, state_abbr):
 
 def make_choice(r, regr_model, state_abbr):
     with st.form("Choose App"):
-        choice = st.selectbox("Select an option:", ["", "Look up a house", "See filtered table of all houses"])
+        choice = st.selectbox("Select an option:", ["Look up a house", "See filtered table of all houses"])
         submit3 = st.form_submit_button("Submit")
 
         if submit3:
