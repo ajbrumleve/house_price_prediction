@@ -176,6 +176,7 @@ class RealtorScraper:
 
         while True:
             try:
+                print(page_number)
                 json_data = self.send_request(page_number=page_number, offset_parameter=offset_parameter,
                                               state_abbr=state_abbr)
                 offset_parameter += 42
