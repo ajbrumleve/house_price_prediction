@@ -24,12 +24,13 @@ def confirm_state():
             df_filename = f'models/{state}_RealtorObject.sav'
             regression_model = pickle.load(open(model_filename, 'rb'))
             real_obj = pickle.load(open(df_filename, 'rb'))
-            st.session_state['data_1'] = {"r":real_obj, "model":regression_model, "state":state}
-            st.session_state['section'] = 'section 2'
-            return real_obj, regression_model, state,"confirmed"
+            st.session_state['data_1'] = {"r": real_obj, "model": regression_model, "state": state}
+            make_choice()
 
         else:
             st.write("File does not exist.")
+
+
 def main(r, regr_model, state_abbr):
     # take input from users using st.form function
     with st.form("Address Search"):
@@ -39,8 +40,8 @@ def main(r, regr_model, state_abbr):
         addresses = r.address_df["address"]
         print(possible_zips[:10])
         print(addresses[:10])
-        zip_code = st.selectbox("Zip code of the house:",possible_zips)
-        house_number = st.selectbox("House number of the house:",addresses)
+        zip_code = st.selectbox("Zip code of the house:", possible_zips)
+        house_number = st.selectbox("House number of the house:", addresses)
 
         # put a submit button to predict the output of the model
         submit2 = st.form_submit_button("Predict")
@@ -50,11 +51,14 @@ def main(r, regr_model, state_abbr):
         if isinstance(address_price, str):
             st.write(address_price)
         elif address_price[0] > address_price[1]:
-            st.write(f"The model predicts a price of \${address_price[1]}. The actual price is \${address_price[0]}. The house is \${address_price[0] - address_price[1]} more expensive than the prediction.")
+            st.write(
+                f"The model predicts a price of \${address_price[1]}. The actual price is \${address_price[0]}. The house is \${address_price[0] - address_price[1]} more expensive than the prediction.")
         elif address_price[0] < address_price[1]:
-            st.write(f"The model predicts a price of \${int(address_price[1])}. The actual price is \${int(address_price[0])}. The house is \${int(address_price[1]) - int(address_price[0])} cheaper than the prediction.")
+            st.write(
+                f"The model predicts a price of \${int(address_price[1])}. The actual price is \${int(address_price[0])}. The house is \${int(address_price[1]) - int(address_price[0])} cheaper than the prediction.")
         elif address_price[0] == address_price[1]:
             st.write(f"The model predicts the exact price of \${address_price[0]}")
+
 
 def make_choice():
     st.subheader("Choose an App:")
@@ -64,14 +68,15 @@ def make_choice():
     if submit3:
         if choice == "Look up a house":
             # Logic for looking up a specific house
-            st.session_state['section'] = 'section 2'
+            main(st.session_state["data 1"]['r'],st.session_state["data 1"]['model'],st.session_state["data 1"]['state'])
             # main(r, regr_model, state_abbr)
 
         else:
             # Logic for showing a filtered table of all houses
-            st.session_state['section'] = 'section 4'
+            st.write("You selected: See filtered table of all houses")
 
-    return "","","",""
+    return "", "", "", ""
+
 
 if __name__ == '__main__':
     # if 'section' not in st.session_state:
@@ -86,10 +91,4 @@ if __name__ == '__main__':
     #     st.write("You selected: See filtered table of all houses")
     # if status == "confirmed":
     #     make_choice(real_obj, regression_model, state)
-    state = "AZ"
-    model_filename = f'models/{state}_realtor_model.sav'
-    df_filename = f'models/{state}_RealtorObject.sav'
-    regression_model = pickle.load(open(model_filename, 'rb'))
-    real_obj = pickle.load(open(df_filename, 'rb'))
-    main(real_obj, regression_model, state)
-
+    confirm_state()
