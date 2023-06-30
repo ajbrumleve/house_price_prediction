@@ -82,17 +82,20 @@ def main():
     else:
         model_filename = f'models/{current_state}_realtor_model.sav'
         df_filename = f'models/{current_state}_RealtorObject.sav'
-        st.session_state['regression_model'] = pickle.load(open(model_filename, 'rb'))
-        st.session_state['real_obj'] = pickle.load(open(df_filename, 'rb'))
-        st.session_state['county_choices'] = Zips([], current_state).get_county_list()
-        activity = st.selectbox("Select an activity", activities)
-        # if st.button("Submit Activity"):
-        st.session_state["activity"] = activity
-        current_activity = st.session_state.get("activity")
-        if current_activity == "Look up a house":
-            look_up_house()
-        elif current_activity == "Create filtered table":
-            create_filtered_dataframe()
+        try:
+            st.session_state['regression_model'] = pickle.load(open(model_filename, 'rb'))
+            st.session_state['real_obj'] = pickle.load(open(df_filename, 'rb'))
+            st.session_state['county_choices'] = Zips([], current_state).get_county_list()
+            activity = st.selectbox("Select an activity", activities)
+            # if st.button("Submit Activity"):
+            st.session_state["activity"] = activity
+            current_activity = st.session_state.get("activity")
+            if current_activity == "Look up a house":
+                look_up_house()
+            elif current_activity == "Create filtered table":
+                create_filtered_dataframe()
+        except:
+            st.write(f"Model not found for {current_state}")
 
 
 # Run the main program
