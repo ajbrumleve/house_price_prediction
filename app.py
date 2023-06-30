@@ -19,12 +19,22 @@ def confirm_state():
     if submit:
         filename = f'models/{state}_realtor_model.sav'
         if os.path.exists(filename):
-            st.write("File exists!")
             model_filename = f'models/{state}_realtor_model.sav'
             df_filename = f'models/{state}_RealtorObject.sav'
             regression_model = pickle.load(open(model_filename, 'rb'))
             real_obj = pickle.load(open(df_filename, 'rb'))
-            main(real_obj, regression_model, state)
+            choice = st.radio("Select an option:", ("Look up a house", "See filtered table of all houses"))
+
+            if choice == "Look up a house":
+                # Logic for looking up a specific house
+                main(real_obj, regression_model, state)
+
+            else:
+                # Logic for showing a filtered table of all houses
+                # ...
+                st.write("You selected: See filtered table of all houses")
+                # ...
+
         else:
             st.write("File does not exist.")
 
@@ -53,6 +63,7 @@ def main(r, regr_model, state_abbr):
             st.write(f"The model predicts a price of \${int(address_price[1])}. The actual price is \${int(address_price[0])}. The house is \${int(address_price[1]) - int(address_price[0])} cheaper than the prediction.")
         elif address_price[0] == address_price[1]:
             st.write(f"The model predicts the exact price of \${address_price[0]}")
+
 
 
 if __name__ == '__main__':
