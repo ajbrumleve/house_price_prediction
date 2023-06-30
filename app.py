@@ -73,6 +73,6 @@ def make_choice(r, regr_model, state_abbr):
 
 
 if __name__ == '__main__':
-    choice = confirm_state()
+    confirm_state()
     # main(r, regr_model, state_abbr)
 
