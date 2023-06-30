@@ -15,20 +15,20 @@ def confirm_state():
         state = st.selectbox("State Abbreviation", STATE_ABBR)
 
         # put a submit button to predict the output of the model
-        submit = st.form_submit_button("Submit")
 
-    if submit:
-        filename = f'models/{state}_realtor_model.sav'
-        if os.path.exists(filename):
-            model_filename = f'models/{state}_realtor_model.sav'
-            df_filename = f'models/{state}_RealtorObject.sav'
-            regression_model = pickle.load(open(model_filename, 'rb'))
-            real_obj = pickle.load(open(df_filename, 'rb'))
-            st.session_state['data_1'] = {"r": real_obj, "model": regression_model, "state": state}
-            make_choice()
 
-        else:
-            st.write("File does not exist.")
+        if st.button("submit"):
+            filename = f'models/{state}_realtor_model.sav'
+            if os.path.exists(filename):
+                model_filename = f'models/{state}_realtor_model.sav'
+                df_filename = f'models/{state}_RealtorObject.sav'
+                regression_model = pickle.load(open(model_filename, 'rb'))
+                real_obj = pickle.load(open(df_filename, 'rb'))
+                st.session_state['data_1'] = {"r": real_obj, "model": regression_model, "state": state}
+                make_choice()
+
+            else:
+                st.write("File does not exist.")
 
 
 def main(r, regr_model, state_abbr):
