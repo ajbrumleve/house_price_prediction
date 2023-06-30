@@ -45,7 +45,7 @@ def create_filtered_dataframe():
     st.subheader("Create filtered table")
     # Get user inputs (e.g., filters)
     min_bedrooms = st.slider("Minimum bedrooms", 1, 5, 1)
-    min_sqft = st.slider("Minimum square footage", 100, 2000, 100)
+    min_sqft = st.slider("Minimum square footage", 100, 5000, 100)
     max_price = st.slider("Maximum price", 100000, 1000000, 100000)
     counties = st.multiselect("Counties", st.session_state['county_choices'])
     real_obj = st.session_state['real_obj']

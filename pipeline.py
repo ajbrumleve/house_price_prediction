@@ -1,3 +1,4 @@
+import os
 import pickle
 import timeit
 from zips import *
@@ -98,6 +99,24 @@ def get_model(realtor_object, state_abbr, file_out=None, grid_search=False):
         filename = f'models/{state_abbr}_realtor_model.sav'
     else:
         filename = file_out
+
+    # Save the model object to a temporary file
+    temp_filename = 'temp_model.sav'
+    pickle.dump(realtor_object, open(temp_filename, 'wb'))
+
+    # Check the file size
+    file_size = os.path.getsize(temp_filename) / (1024 * 1024)  # Size in MB
+    df_size = len(regr_model.X_train)
+    # If the file size is larger than 100MB, scale down the model
+    if file_size > 100:
+        print("Scaling model")
+        scale_factor = 100/file_size
+        new_df_size = round(scale_factor * df_size)
+        regr_model.model = RandomForestRegressor(n_estimators=100)
+        regr_model.model.fit(regr_model.X_train[:new_df_size], regr_model.y_train[:new_df_size])
+        realtor_object.model = regr_model
+    # Remove the temporary file
+    os.remove(temp_filename)
     pickle.dump(realtor_object, open(filename, 'wb'))
     return regr_model
 
