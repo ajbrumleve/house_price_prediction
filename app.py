@@ -9,26 +9,25 @@ from zips import Zips
 
 
 def confirm_state():
-    with st.form("Get State"):
-        st.subheader("Models are trained for each state. What state are you interested in?")
-        # define variable to store user inputs
-        state = st.selectbox("State Abbreviation", STATE_ABBR)
+    st.subheader("Models are trained for each state. What state are you interested in?")
+    # define variable to store user inputs
+    state = st.selectbox("State Abbreviation", STATE_ABBR)
 
-        # put a submit button to predict the output of the model
+    # put a submit button to predict the output of the model
 
 
-        if st.button("submit"):
-            filename = f'models/{state}_realtor_model.sav'
-            if os.path.exists(filename):
-                model_filename = f'models/{state}_realtor_model.sav'
-                df_filename = f'models/{state}_RealtorObject.sav'
-                regression_model = pickle.load(open(model_filename, 'rb'))
-                real_obj = pickle.load(open(df_filename, 'rb'))
-                st.session_state['data_1'] = {"r": real_obj, "model": regression_model, "state": state}
-                make_choice()
+    if st.button("submit"):
+        filename = f'models/{state}_realtor_model.sav'
+        if os.path.exists(filename):
+            model_filename = f'models/{state}_realtor_model.sav'
+            df_filename = f'models/{state}_RealtorObject.sav'
+            regression_model = pickle.load(open(model_filename, 'rb'))
+            real_obj = pickle.load(open(df_filename, 'rb'))
+            st.session_state['data_1'] = {"r": real_obj, "model": regression_model, "state": state}
+            make_choice()
 
-            else:
-                st.write("File does not exist.")
+        else:
+            st.write("File does not exist.")
 
 
 def main(r, regr_model, state_abbr):
