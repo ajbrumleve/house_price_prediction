@@ -133,13 +133,13 @@ class LoadModelPanel(wx.Panel):
         train_sizer.Add(train_file_out_sizer_horizontal, flag=wx.ALL | wx.LEFT, border=5)
         # teams_sizer.Add(input_sizer1)
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add(load_label, proportion=.5, flag=wx.ALL | wx.LEFT, border=5)
-        main_sizer.Add(load_sizer_horizontal, proportion=.5, flag=wx.ALL | wx.LEFT, border=5)
+        main_sizer.Add(load_label, proportion=1, flag=wx.ALL | wx.LEFT, border=5)
+        main_sizer.Add(load_sizer_horizontal, proportion=1, flag=wx.ALL | wx.LEFT, border=5)
         # main_sizer.Add(train_label, proportion=.5, flag=wx.ALL | wx.LEFT, border=5)
-        main_sizer.Add(train_sizer, proportion=.5, flag=wx.ALL | wx.LEFT, border=5)
+        main_sizer.Add(train_sizer, proportion=1, flag=wx.ALL | wx.LEFT, border=5)
         # main_sizer.Add(button, proportion=.5, flag=wx.ALL | wx.CENTER, border=5)
         # main_sizer.Add(self.result_txt, proportion=.5, flag=wx.ALL | wx.CENTER, border=5)
-        main_sizer.Add(logText, proportion=.5, flag=wx.ALL | wx.CENTER, border=5)
+        main_sizer.Add(logText, proportion=1, flag=wx.ALL | wx.CENTER, border=5)
 
         self.SetSizer(main_sizer)
 
@@ -163,8 +163,8 @@ class MenuPanel(wx.Panel):
         filter_df_sizer_horizontal.Add(self.filter_df_button, flag=wx.ALL | wx.CENTER, border=5)
         filter_df_sizer_horizontal.Add(filter_df_label, flag=wx.ALL | wx.CENTER, border=5)
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add(find_house_sizer_horizontal, proportion=.5, flag=wx.ALL | wx.LEFT, border=5)
-        main_sizer.Add(filter_df_sizer_horizontal, proportion=.5, flag=wx.ALL | wx.LEFT, border=5)
+        main_sizer.Add(find_house_sizer_horizontal, proportion=1, flag=wx.ALL | wx.LEFT, border=5)
+        main_sizer.Add(filter_df_sizer_horizontal, proportion=10, flag=wx.ALL | wx.LEFT, border=5)
 
         self.SetSizer(main_sizer)
 
@@ -208,10 +208,10 @@ class FindHousePanel(wx.Panel):
         house_number_sizer.Add(house_number_label, flag=wx.ALL | wx.LEFT, border=5)
 
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add(zip_sizer, proportion=.5, flag=wx.ALL | wx.ALIGN_LEFT, border=5)
-        main_sizer.Add(house_number_sizer, proportion=.5, flag=wx.ALL | wx.ALIGN_LEFT, border=5)
-        main_sizer.Add(self.submit_button, proportion=.5, flag=wx.ALL | wx.ALIGN_LEFT, border=5)
-        main_sizer.Add(self.result_txt, proportion=.5, flag=wx.ALL | wx.ALIGN_LEFT, border=5)
+        main_sizer.Add(zip_sizer, proportion=1, flag=wx.ALL | wx.ALIGN_LEFT, border=5)
+        main_sizer.Add(house_number_sizer, proportion=1, flag=wx.ALL | wx.ALIGN_LEFT, border=5)
+        main_sizer.Add(self.submit_button, proportion=1, flag=wx.ALL | wx.ALIGN_LEFT, border=5)
+        main_sizer.Add(self.result_txt, proportion=1, flag=wx.ALL | wx.ALIGN_LEFT, border=5)
         self.SetSizer(main_sizer)
 
 
@@ -284,14 +284,14 @@ class FilterTablePanel(wx.Panel):
         file_out_sizer.Add(file_out_label, flag=wx.ALL | wx.LEFT, border=5)
 
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-        main_sizer.Add(beds_sizer, proportion=.5, flag=wx.ALL | wx.LEFT, border=5)
-        main_sizer.Add(sqft_sizer, proportion=.5, flag=wx.ALL | wx.LEFT, border=5)
-        main_sizer.Add(price_sizer, proportion=.5, flag=wx.ALL | wx.LEFT, border=5)
-        main_sizer.Add(counties_sizer, proportion=.5, flag=wx.ALL | wx.LEFT, border=5)
-        main_sizer.Add(state_sizer, proportion=.5, flag=wx.ALL | wx.LEFT, border=5)
-        main_sizer.Add(file_out_sizer, proportion=.5, flag=wx.ALL | wx.LEFT, border=5)
-        main_sizer.Add(self.submit_button, proportion=.5, flag=wx.ALL | wx.LEFT, border=5)
-        main_sizer.Add(self.result_txt, proportion=.5, flag=wx.ALL | wx.LEFT, border=5)
+        main_sizer.Add(beds_sizer, proportion=1, flag=wx.ALL | wx.LEFT, border=5)
+        main_sizer.Add(sqft_sizer, proportion=1, flag=wx.ALL | wx.LEFT, border=5)
+        main_sizer.Add(price_sizer, proportion=1, flag=wx.ALL | wx.LEFT, border=5)
+        main_sizer.Add(counties_sizer, proportion=1, flag=wx.ALL | wx.LEFT, border=5)
+        main_sizer.Add(state_sizer, proportion=1, flag=wx.ALL | wx.LEFT, border=5)
+        main_sizer.Add(file_out_sizer, proportion=1, flag=wx.ALL | wx.LEFT, border=5)
+        main_sizer.Add(self.submit_button, proportion=1, flag=wx.ALL | wx.LEFT, border=5)
+        main_sizer.Add(self.result_txt, proportion=1, flag=wx.ALL | wx.LEFT, border=5)
         self.SetSizer(main_sizer)
 
 
