@@ -137,7 +137,7 @@ pip install beautifulsoup4
     ```bash
     pipenv install
     ```
-4. Run `house_price_interface.py` to run the graphical interface. For a console interface, run pipeline.py. 
+4. For a console interface, run pipeline.py. For a GUI, the streamlit app is located [here](https://housepriceprediction-test.streamlit.app/)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -146,11 +146,11 @@ pip install beautifulsoup4
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-If using the GUI interface, enter a file location and the state abbreviation you are interested in and click train. The log window will show the steps currently running. Once the model is trained you will immediately be able to try the model.
+If using the Streamlit app, enter the state you are interested in. Models have been pretraineden trained. There are two prediction activities available. The first lets you enter an address and see the comparison between the predicted price and the list price of that address. 
 
-If a model has already been trained, you may load the model through the interface. There are two prediction activities available. The first lets you enter a zip code and a house number and see the comparison between the predicted price and the list price of that address. If the house is not for sale, you should get an error.
+You can also create a filtered csv. You input a minimum number of bedrooms, minimum square footage, and a maximum price along with the counties to search in. The app will display a DataFrame with all of the houses in those counties for sale which meet your criteria sorted by how much cheaper than the prediction the house is.
 
-You can also create a filtered csv. You input a minimum number of bedrooms, minimum square footage, and a maximum price along with the counties to search in. The code will create a csv with all of the houses in those counties for sale which meet your criteria sorted by how much cheaper than the prediction the house is.
+The console app gives an additional option to train a new model in a given state. You also have the choice to use Grid Search to choose the best model for the data between Random Forest and XGBoost. This takes much longer to train though.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
