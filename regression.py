@@ -80,6 +80,19 @@ class Regression:
 
     @log
     def grid_search(self):
+        """
+        Perform grid search to find the best model with optimized hyperparameters.
+
+        This function performs grid search on multiple regression algorithms to find the best model
+        with optimized hyperparameters based on the provided training data. The algorithms and their
+        corresponding parameter grids are defined within the function.
+
+        Returns:
+            best_model: The best model found during the grid search process.
+
+        Example:
+            regr_model = grid_search()
+        """
         algorithms = [
             ('Random Forest', RandomForestRegressor(), {'n_estimators': [100, 200, 300], 'max_depth': [None, 5, 10]}),
             ('XGBoost', XGBRegressor(),
@@ -87,7 +100,7 @@ class Regression:
         ]
         best_models = []
         for name, model, param_grid in algorithms:
-            grid_search = GridSearchCV(model, param_grid, scoring='r2', cv=5)
+            grid_search = GridSearchCV(model, param_grid, scoring='r2', cv=5, verbose=3)
             grid_search.fit(self.X_train, self.y_train)
             best_model = grid_search.best_estimator_
             y_pred = best_model.predict(self.X_test)

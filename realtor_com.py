@@ -248,9 +248,9 @@ class RealtorScraper:
 
         s = (df_new.dtypes == 'category')
         object_cols = list(s[s].index)
-        print("Categorical variables:")
-        print(object_cols)
-        print('No. of. categorical features: ', len(object_cols))
+        # print("Categorical variables:")
+        # print(object_cols)
+        # print('No. of. categorical features: ', len(object_cols))
 
         OH_encoder = OneHotEncoder(sparse=False)
         OH_cols = pd.DataFrame(OH_encoder.fit_transform(df_new[object_cols]))
@@ -362,9 +362,9 @@ def clean_data(df):
 
     s = (df_new.dtypes == 'category')
     object_cols = list(s[s].index)
-    print("Categorical variables:")
-    print(object_cols)
-    print('No. of. categorical features: ', len(object_cols))
+    # print("Categorical variables:")
+    # print(object_cols)
+    # print('No. of. categorical features: ', len(object_cols))
 
     OH_encoder = OneHotEncoder(sparse=False)
     OH_cols = pd.DataFrame(OH_encoder.fit_transform(df_new[object_cols]))

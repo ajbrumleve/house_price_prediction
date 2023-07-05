@@ -1,9 +1,9 @@
 import pickle
-import timeit
+
+from pandas.errors import PerformanceWarning
+
 from zips import *
 from logging_decorator import *
-from sklearn import svm
-from sklearn.feature_selection import RFE
 from sklearn.feature_selection import RFECV
 from realtor_com import RealtorScraper
 from realtor_zip_search import RealtorZipScraper
@@ -18,8 +18,10 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.model_selection import train_test_split
+import warnings
 
-
+warnings.filterwarnings("ignore", category=PerformanceWarning)
+warnings.filterwarnings("ignore", category=FutureWarning, module="sklearn")
 @log
 def get_realtor_object(state_abbr):
     """Retrieve a RealtorScraper object for a specific state.
@@ -44,8 +46,12 @@ def get_realtor_object(state_abbr):
     except Exception as e:
         logging.error(e)
         return
-    filename = f'models/{state_abbr}_RealtorObject.sav'
-    pickle.dump(r, open(filename, 'wb'))
+    try:
+        filename = f'models/{state_abbr}_RealtorObject.sav'
+        pickle.dump(r, open(filename, 'wb'))
+    except:
+        print(Exception)
+
     return r
 
 
@@ -71,7 +77,7 @@ def get_model(realtor_object, state_abbr, file_out=None, grid_search=False):
     """
     regr_model = Regression()
 
-    regr_model.train, regr_model.test = Regression.train_test_split(Regression, realtor_object.df)
+    regr_model.train, regr_model.test = Regression.train_test_split(regr_model, realtor_object.df)
     # Added code which cleaned the original data so this is redundant. It may be better to save cleaning until after
     # train-test split though to avoid data_leakage.
     # regr_model.train = Services.clean(Services, regr_model.train)
@@ -91,7 +97,7 @@ def get_model(realtor_object, state_abbr, file_out=None, grid_search=False):
     if grid_search:
         regr_model.model = regr_model.grid_search()
     else:
-        regr_model.model = RandomForestRegressor(n_estimators=300)
+        regr_model.model = RandomForestRegressor(max_depth=None,n_estimators=200)
     regr_model.model.fit(regr_model.X_train, regr_model.y_train)
     realtor_object.model = regr_model
     if file_out is None:
@@ -301,87 +307,6 @@ def run():
     logging.basicConfig(level=logging.INFO)
     log_info = logging.FileHandler('logs/test-log.log')
     log_info.setLevel(logging.INFO)
-    logging.getLogger('').addHandler(log_info)
-    t_file = timeit.default_timer()
-    logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + "Starting program")
-
-    if prebuilt_model is not None:
-        try:
-            t_section = timeit.default_timer()
-            logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + f"Starting to load model")
-            filename = prebuilt_model
-            regr_model = pickle.load(open(filename, 'rb'))
-            logging.info(datetime.now().strftime(
-                '%H:%M:%S.%f') + " - " + f"Model loaded")
-        except FileNotFoundError:
-            logging.error(datetime.now().strftime('%H:%M:%S.%f') + " - " + "File not found, building model")
-            t_section = timeit.default_timer()
-            logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + f"Starting to scrape for dataset")
-            r = get_realtor_object(state_abbr)
-            logging.info(datetime.now().strftime(
-                '%H:%M:%S.%f') + " - " + f"Dataset scraped in {timeit.default_timer() - t_section} seconds")
-            t_section = timeit.default_timer()
-            logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + f"Starting to build model")
-            regr_model = get_model(r, state_abbr)
-            logging.info(datetime.now().strftime(
-                '%H:%M:%S.%f') + " - " + f"Model built in {timeit.default_timer() - t_section} seconds")
-    elif prebuilt_model == False:
-        t_section = timeit.default_timer()
-        logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + f"Starting to scrape for dataset")
-        r = get_realtor_object()
-        logging.info(datetime.now().strftime(
-            '%H:%M:%S.%f') + " - " + f"Dataset scraped in {timeit.default_timer() - t_section} seconds")
-        t_section = timeit.default_timer()
-        logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + f"Starting to build model")
-        regr_model = get_model(r, state_abbr)
-        logging.info(datetime.now().strftime(
-            '%H:%M:%S.%f') + " - " + f"Model built in {timeit.default_timer() - t_section} seconds")
-    else:
-        logging.error(datetime.now().strftime(
-            '%H:%M:%S.%f') + " - " + "Prebuilt_model must be True or False.")
-        return
-
-    evaluate_model(regr_model)
-    zip = input("what is the zip code?")
-    house_num = input("What is the house number?")
-    address_price = predict_specific_address(r, regr_model, zip, house_num)
-    try:
-        if address_price[0] > address_price[1]:
-            print(
-                f"The model predicts a price of {address_price[1]}. The actual price is {address_price[0]}. The house is {address_price[0] - address_price[1]} more expensive than the prediction.")
-        elif address_price[0] < address_price[1]:
-            print(
-                f"The model predicts a price of {address_price[1]}. The actual price is {address_price[0]}. The house is {address_price[1] - address_price[0]} cheaper than the prediction.")
-        else:
-            print(f"The model predicts the exact price of {address_price[0]}")
-    except TypeError as e:
-        logging.error(e)
-
-    # zip_scraper = RealtorZipScraper(page_numbers=10,columns=r.df.columns)
-    # for key,value in r.cat_maps["postal_code"].items():
-    #     if zip == value:
-    #         encoded_zip = key
-    # slice = zip_scraper.create_dataframe(zip)
-    # slice = slice.rename(columns={"postal_code":encoded_zip})
-    # slice[encoded_zip] = 1
-    # slice = slice[slice["address"].str.contains(house_num)]
-    # zip_scraper.df = pd.DataFrame()
-    # for col in zip_scraper.df_columns:
-    #     if col in slice.columns:
-    #         zip_scraper.df[col] = slice[col]
-    #     else:
-    #         zip_scraper.df[col] = 0
-    # zip_scraper.df = zip_scraper.df[regr_model.train.columns]
-    # zip_scraper.real_price = zip_scraper.df['price'].values[0]
-    # zip_scraper.df = zip_scraper.df.drop(['price'],axis=1)
-    #
-
-
-if __name__ == "__main__":
-    logger = logging.getLogger("test")
-    logging.basicConfig(level=logging.INFO)
-    log_info = logging.FileHandler('logs/test-log.log')
-    log_info.setLevel(logging.INFO)
     logging.getLogger("pipeline")
     t_file = timeit.default_timer()
     logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + "Starting program")
@@ -443,12 +368,12 @@ if __name__ == "__main__":
             try:
                 if address_price[0] > address_price[1]:
                     print(
-                        f"The model predicts a price of {address_price[1]}. The actual price is {address_price[0]}. The house is {address_price[0] - address_price[1]} more expensive than the prediction.")
+                        f"The model predicts a price of ${address_price[1]:,}. The actual price is ${address_price[0]:,}. The house is ${(address_price[0] - address_price[1]):,} more expensive than the prediction.")
                 elif address_price[0] < address_price[1]:
                     print(
-                        f"The model predicts a price of {address_price[1]}. The actual price is {address_price[0]}. The house is {address_price[1] - address_price[0]} cheaper than the prediction.")
+                        f"The model predicts a price of ${address_price[1]:,}. The actual price is ${address_price[0]:,}. The house is ${(address_price[1] - address_price[0]):,} cheaper than the prediction.")
                 else:
-                    print(f"The model predicts the exact price of {address_price[0]}")
+                    print(f"The model predicts the exact price of ${address_price[0]:,}")
             except TypeError as e:
                 logging.error(e)
             while True:
@@ -460,12 +385,132 @@ if __name__ == "__main__":
                     try:
                         if address_price[0] > address_price[1]:
                             print(
-                                f"The model predicts a price of ${address_price[1]}. The actual price is ${address_price[0]}. The house is {address_price[0] - address_price[1]} more expensive than the prediction.")
+                                f"The model predicts a price of ${address_price[1]:,}. The actual price is ${address_price[0]:,}. The house is ${(address_price[0] - address_price[1]):,} more expensive than the prediction.")
                         elif address_price[0] < address_price[1]:
                             print(
-                                f"The model predicts a price of ${address_price[1]}. The actual price is ${address_price[0]}. The house is {address_price[1] - address_price[0]} cheaper than the prediction.")
+                                f"The model predicts a price of ${address_price[1]:,}. The actual price is ${address_price[0]:,}. The house is ${(address_price[1] - address_price[0]):,} cheaper than the prediction.")
                         else:
-                            print(f"The model predicts the exact price of ${address_price[0]}")
+                            print(f"The model predicts the exact price of ${address_price[0]:,}")
+                    except TypeError as e:
+                        logging.error(e)
+                elif repeat == "N":
+                    break
+        elif menu_1 == "2":
+            min_beds = float(input("What is the minimum number of bedrooms? "))
+            min_sqft = float(input("What is the minimum number of square feet? "))
+            max_price = float(input("What is the maximum asking price? "))
+
+            counties = []
+            while True:
+                county = input('Add a county to search? If finished, type done. ')
+                if county == "done":
+                    break
+                else:
+                    counties.append(county)
+            filtered_df = find_deals(r, regr_model, min_beds, min_sqft, max_price, counties, state_abbr)
+            out_file = input("Where do you want to save the csv?")
+            filtered_df.to_csv(out_file, index=False)
+            finished = input("Are you finished? Y/N\n")
+            if finished == "Y":
+                raise SystemExit(0)
+            else:
+                continue
+        elif menu_1 == "break":
+            break
+        else:
+            print("Choose 1 or 2.")
+
+
+if __name__ == "__main__":
+    logger = logging.getLogger("test")
+    logging.basicConfig(level=logging.INFO)
+    log_info = logging.FileHandler('logs/test-log.log')
+    log_info.setLevel(logging.INFO)
+    logging.getLogger("pipeline")
+    t_file = timeit.default_timer()
+    logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + "Starting program")
+
+    while True:
+        prebuilt_model = input("Would you like to load a model? Y/N\n")
+        if prebuilt_model == "Y":
+            state_abbr = input("What is the state abbreviation you want to load a model for? eg MO\n")
+            try:
+                t_section = timeit.default_timer()
+                logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + f"Starting to load model")
+                r = pickle.load(open(f"models/{state_abbr}_RealtorObject.sav", 'rb'))
+                regr_model = pickle.load(open(f"models/{state_abbr}_realtor_model.sav", 'rb'))
+                logging.info(datetime.now().strftime(
+                    '%H:%M:%S.%f') + " - " + f"Model loaded")
+                break
+            except FileNotFoundError:
+                logging.info(datetime.now().strftime(
+                    '%H:%M:%S.%f') + " - " + f"File not found")
+            continue
+        elif prebuilt_model == "N":
+            while True:
+                train_bool = input("Would you like to train a new model? Y/N\n")
+                if train_bool == "Y":
+                    state_abbr = input("What is the abbreviation of the state you want to scrape data from? e.g. MO\n")
+                    grid_search_prompt = input(
+                        "Would you like to use grid search to tune your model? Processing time is significantly longer. Y/N\n")
+                    if grid_search_prompt == "Y":
+                        grid_search = True
+                    else:
+                        grid_search = False
+                    t_section = timeit.default_timer()
+                    logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + f"Starting to scrape for dataset")
+                    r = get_realtor_object(state_abbr)
+                    print(r.df.head())
+                    logging.info(datetime.now().strftime(
+                        '%H:%M:%S.%f') + " - " + f"Dataset scraped in {timeit.default_timer() - t_section} seconds")
+                    t_section = timeit.default_timer()
+                    logging.info(datetime.now().strftime('%H:%M:%S.%f') + " - " + f"Starting to build model")
+                    regr_model = get_model(r, state_abbr, grid_search=grid_search)
+                    evaluate_model(regr_model)
+                    logging.info(datetime.now().strftime(
+                        '%H:%M:%S.%f') + " - " + f"Model built in {timeit.default_timer() - t_section} seconds")
+                    break
+                elif train_bool == "N":
+                    raise SystemExit(0)
+                else:
+                    print("Please choose Y or N.")
+                continue
+            break
+        else:
+            print("Enter Y or N.")
+
+    while True:
+        menu_1 = input("What would you like to do?\n1 - search address\n2 - create filtered table\n")
+        if menu_1 == "1":
+            zip_code = input("What is the zip code of the house? ")
+            house_num = input("What is the house number of the house? ")
+            address_price = predict_specific_address(r, regr_model, zip_code, house_num)
+            try:
+                if address_price[0] > address_price[1]:
+                    print(
+                        f"The model predicts a price of ${address_price[1]:,}. The actual price is ${address_price[0]:,}. The house is ${(address_price[0] - address_price[1]):,} more expensive than the prediction.")
+                elif address_price[0] < address_price[1]:
+                    print(
+                        f"The model predicts a price of ${address_price[1]:,}. The actual price is ${address_price[0]:,}. The house is ${(address_price[1] - address_price[0]):,} cheaper than the prediction.")
+                else:
+                    print(f"The model predicts the exact price of ${address_price[0]}")
+            except TypeError as e:
+                logging.error(e)
+            while True:
+                repeat = input("Would you like to look up another house? Y/N ")
+                if repeat == "Y":
+                    zip_code = input("What is the zip code of the house? ")
+                    house_num = input("What is the house number of the house? ")
+                    address_price = predict_specific_address(r, regr_model, zip_code, house_num)
+                    try:
+                        if address_price[0] > address_price[1]:
+                            print(
+                                f"The model predicts a price of ${address_price[1]:,}. The actual price is ${address_price[0]:,}. The house is {(address_price[0] - address_price[1]):,} more expensive than the prediction.")
+                        elif address_price[0] < address_price[1]:
+                            print(
+                                f"The model predicts a price of ${address_price[1]:,}. The actual price is ${address_price[0]:,}. The house is {(address_price[1] - address_price[0]):,} cheaper than the prediction.")
+                        else:
+                            print(f"The model predicts the exact price of ${address_price[0]:,}")
                     except TypeError as e:
                         logging.error(e)
                 elif repeat == "N":
