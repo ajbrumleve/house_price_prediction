@@ -63,7 +63,7 @@ def create_filtered_dataframe():
 # Main program
 def main():
     # Initialize session state
-    st.header("House Price Predictor")
+    st.header("HouseAI")
     if "state" not in st.session_state:
         st.session_state["state"] = None
 
